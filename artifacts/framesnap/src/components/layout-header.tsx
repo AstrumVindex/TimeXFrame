@@ -23,7 +23,7 @@ export function Header({ onExtractClick }: HeaderProps) {
           <div className="bg-zinc-900 text-white p-1.5 rounded-lg shadow-sm">
             <Frame className="w-5 h-5" />
           </div>
-          FrameSnap
+          TimexFrame
         </a>
 
         {/* Nav links */}

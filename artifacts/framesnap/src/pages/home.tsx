@@ -127,7 +127,7 @@ export default function Home() {
 
               {/* Compact footer in workspace mode */}
               <footer className="border-t border-zinc-100 pt-6 text-center text-xs text-zinc-400">
-                © {new Date().getFullYear()} FrameSnap — Fast, free video frame extractor.
+                © {new Date().getFullYear()} TimexFrame — Fast, free video frame extractor.
               </footer>
             </motion.div>
           )}
