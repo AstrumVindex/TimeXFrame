@@ -1,0 +1,160 @@
+Upgrade the "Extraction Settings" module of the FrameSnap web app into a professional, advanced multi-mode system with better UX, more control, and intelligent options.
+
+IMPORTANT:
+- Keep UI minimal and clean (no bright colors)
+- Maintain current design style (rounded cards, soft shadows)
+- Make it feel like a premium SaaS tool
+
+CORE IMPROVEMENTS:
+
+1. Multi-Mode Extraction System (Replace current toggle)
+
+Add 4 tabs instead of 2:
+
+- By Interval
+- By Timestamp
+- By Frames Count
+- Smart Extract (NEW)
+
+---
+
+2. By Interval (Enhanced)
+
+- Input: Extract frame every X seconds
+- Add:
+  - Start Time (optional)
+  - End Time (optional)
+- Example:
+  - Start: 00:00:10
+  - End: 00:01:00
+
+- Add preview:
+  - Show estimated number of frames before extraction
+
+---
+
+3. By Timestamp (Enhanced)
+
+- Allow multiple timestamps (not just one)
+- Input format:
+  - 00:00:05, 00:00:10, 00:00:25
+
+- Add:
+  - “Add Timestamp” button (dynamic input fields)
+
+---
+
+4. By Frames Count (NEW MODE)
+
+- User selects total number of frames (e.g. 10, 20, 50)
+- System automatically distributes frames evenly across video
+
+👉 This is very useful and rare in free tools
+
+---
+
+5. Smart Extract Mode (IMPORTANT)
+
+Add intelligent filters (no heavy AI, just logic-based):
+
+- Extract only:
+  - Sharp frames (blur detection)
+  - Bright frames
+  - Scene change frames
+
+- Add toggles:
+  [ ] Avoid blurry frames  
+  [ ] Prefer bright frames  
+  [ ] Detect scene changes  
+
+- Show:
+  “Recommended frames will be selected automatically”
+
+---
+
+6. Quality & Format Controls
+
+Enhance existing JPEG quality:
+
+- Add:
+  - Output format:
+    - JPG
+    - PNG
+    - WEBP
+
+- Add resolution options:
+  - Original
+  - 720p
+  - 1080p
+
+---
+
+7. Live Estimation Panel (NEW)
+
+Show small info box:
+
+- Estimated frames: 24
+- Estimated size: ~12MB
+- Processing time: ~5 sec
+
+👉 Updates dynamically when user changes settings
+
+---
+
+8. UX Improvements
+
+- Smooth tab switching animation
+- Disable Extract button if input invalid
+- Add tooltip icons (ℹ️) for explanations
+- Add small helper text under each input
+
+---
+
+9. Advanced Controls (Collapsible Section)
+
+Add "Advanced Settings":
+
+- Frame naming pattern:
+  - frame_001.jpg
+- Frame rate extraction (fps-based)
+- Skip first X seconds
+
+---
+
+10. CTA Improvement
+
+Update button:
+
+- "Extract Frames" → "Start Extraction"
+- Add loading state:
+  - Spinner + “Processing…”
+
+---
+
+BACKEND REQUIREMENTS:
+
+- Update API to support:
+  - multiple timestamps
+  - frame count distribution
+  - start/end trimming
+- Use FFmpeg filters:
+  - fps filter
+  - select filter for scene detection
+
+---
+
+UI DESIGN RULES:
+
+- Keep grayscale palette
+- Use subtle borders instead of heavy colors
+- Maintain spacing consistency
+- Make it look like a developer tool (clean + precise)
+
+---
+
+OUTPUT:
+
+- Updated React component for Extraction Settings
+- Backend logic updates (Node.js + FFmpeg commands)
+- Example FFmpeg commands for each mode
+- Clean modular code

@@ -5,222 +5,275 @@ import fs from "fs/promises";
 
 const execAsync = promisify(exec);
 
-// Base directories for uploads and extracted frames
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-const FRAMES_DIR = path.join(process.cwd(), "frames");
+export const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+export const FRAMES_DIR = path.join(process.cwd(), "frames");
 
-// Ensure directories exist
 export async function ensureDirectories() {
   await fs.mkdir(UPLOADS_DIR, { recursive: true });
   await fs.mkdir(FRAMES_DIR, { recursive: true });
 }
 
-// Get video metadata (duration, dimensions) using ffprobe
-export async function getVideoMetadata(filePath: string): Promise<{
-  duration: number;
-  width: number;
-  height: number;
-}> {
-  const cmd = `ffprobe -v quiet -print_format json -show_streams "${filePath}"`;
+// ─── Video metadata ─────────────────────────────────────────────────────────
+
+export async function getVideoMetadata(filePath: string) {
+  const cmd = `ffprobe -v quiet -print_format json -show_streams -show_format "${filePath}"`;
   const { stdout } = await execAsync(cmd);
   const data = JSON.parse(stdout);
+  const videoStream = data.streams?.find((s: { codec_type: string }) => s.codec_type === "video");
+  if (!videoStream) throw new Error("No video stream found in file");
 
-  // Find the video stream
-  const videoStream = data.streams?.find(
-    (s: { codec_type: string }) => s.codec_type === "video"
-  );
+  let duration = parseFloat(videoStream.duration || "0");
+  if (!duration) duration = parseFloat(data.format?.duration || "0");
 
-  if (!videoStream) {
-    throw new Error("No video stream found in file");
-  }
-
-  // Parse duration from stream or format
-  let duration = 0;
-  if (videoStream.duration) {
-    duration = parseFloat(videoStream.duration);
-  } else {
-    // Try format duration
-    const fmtCmd = `ffprobe -v quiet -print_format json -show_format "${filePath}"`;
-    const { stdout: fmtOut } = await execAsync(fmtCmd);
-    const fmtData = JSON.parse(fmtOut);
-    duration = parseFloat(fmtData.format?.duration || "0");
-  }
-
-  return {
-    duration,
-    width: videoStream.width || 0,
-    height: videoStream.height || 0,
-  };
+  return { duration, width: videoStream.width || 0, height: videoStream.height || 0 };
 }
 
-// Extract a single frame at a specific timestamp (hh:mm:ss format)
+// ─── Timestamp helpers ───────────────────────────────────────────────────────
+
+export function timestampToSeconds(ts: string): number {
+  const parts = ts.split(":").map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return parts[0] || 0;
+}
+
+function secondsToTimestamp(s: number): string {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+// Quality → FFmpeg qv (1 best, 31 worst)
+function qualityToQv(quality: number) {
+  return Math.max(1, Math.round(((100 - quality) / 100) * 31) + 1);
+}
+
+// Extension for format
+function formatExt(fmt: string) {
+  return fmt === "png" ? "png" : fmt === "webp" ? "webp" : "jpg";
+}
+
+// ─── Extraction helpers ──────────────────────────────────────────────────────
+
+async function ensureSessionDir(sessionId: string) {
+  const dir = path.join(FRAMES_DIR, sessionId);
+  await fs.mkdir(dir, { recursive: true });
+  return dir;
+}
+
+async function listFrames(dir: string, ext: string) {
+  const files = await fs.readdir(dir);
+  return files.filter((f) => f.endsWith(`.${ext}`)).sort();
+}
+
+// ─── 1. Single timestamp ─────────────────────────────────────────────────────
+
 export async function extractFrameAtTimestamp(
   videoPath: string,
   sessionId: string,
   timestamp: string,
-  quality: number = 85
+  quality = 85,
+  format = "jpg"
 ): Promise<string> {
-  const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
-  await fs.mkdir(sessionFramesDir, { recursive: true });
+  const dir = await ensureSessionDir(sessionId);
+  const ext = formatExt(format);
+  const secs = timestampToSeconds(timestamp);
+  const filename = `frame_${String(Math.round(secs * 1000)).padStart(10, "0")}.${ext}`;
+  const out = path.join(dir, filename);
 
-  // Convert timestamp to seconds for the filename
-  const seconds = timestampToSeconds(timestamp);
-  const filename = `frame_${String(Math.round(seconds * 1000)).padStart(10, "0")}.jpg`;
-  const outputPath = path.join(sessionFramesDir, filename);
+  let encArgs = format === "png"
+    ? `-compression_level 3`
+    : format === "webp"
+    ? `-quality ${quality}`
+    : `-q:v ${qualityToQv(quality)}`;
 
-  // FFmpeg command to extract a single frame at the given timestamp
-  const cmd = `ffmpeg -y -ss "${timestamp}" -i "${videoPath}" -vframes 1 -q:v ${Math.round(((100 - quality) / 100) * 31) + 1} "${outputPath}"`;
-  await execAsync(cmd);
-
+  await execAsync(`ffmpeg -y -ss "${timestamp}" -i "${videoPath}" -vframes 1 ${encArgs} "${out}"`);
   return filename;
 }
 
-// Extract frames at regular intervals (every X seconds)
+// ─── 2. Multiple timestamps ──────────────────────────────────────────────────
+
+export async function extractMultipleTimestamps(
+  videoPath: string,
+  sessionId: string,
+  timestamps: string[],
+  quality = 85,
+  format = "jpg"
+): Promise<string[]> {
+  const results: string[] = [];
+  for (const ts of timestamps) {
+    const fn = await extractFrameAtTimestamp(videoPath, sessionId, ts, quality, format);
+    results.push(fn);
+  }
+  return results;
+}
+
+// ─── 3. Interval extraction ──────────────────────────────────────────────────
+
 export async function extractFramesAtInterval(
   videoPath: string,
   sessionId: string,
   intervalSeconds: number,
-  quality: number = 85
+  quality = 85,
+  format = "jpg",
+  startTime?: string,
+  endTime?: string
 ): Promise<string[]> {
-  const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
-  await fs.mkdir(sessionFramesDir, { recursive: true });
-
-  // FFmpeg -vf fps filter: extract 1 frame every intervalSeconds
+  const dir = await ensureSessionDir(sessionId);
+  const ext = formatExt(format);
   const fps = 1 / intervalSeconds;
-  const outputPattern = path.join(sessionFramesDir, "frame_%010d.jpg");
+  const pattern = path.join(dir, `frame_%010d.${ext}`);
 
-  // q:v controls JPEG quality: 1 is best, 31 is worst
-  const qValue = Math.round(((100 - quality) / 100) * 31) + 1;
-  const cmd = `ffmpeg -y -i "${videoPath}" -vf "fps=${fps}" -q:v ${qValue} "${outputPattern}"`;
-  await execAsync(cmd);
+  const ssFlag = startTime ? `-ss "${startTime}"` : "";
+  const toFlag = endTime ? `-to "${endTime}"` : "";
 
-  // List all extracted frames in order
-  const files = await fs.readdir(sessionFramesDir);
-  return files.filter((f) => f.endsWith(".jpg")).sort();
+  let encArgs = format === "png"
+    ? `-compression_level 3`
+    : format === "webp"
+    ? `-quality ${quality}`
+    : `-q:v ${qualityToQv(quality)}`;
+
+  await execAsync(
+    `ffmpeg -y ${ssFlag} ${toFlag} -i "${videoPath}" -vf "fps=${fps}" ${encArgs} "${pattern}"`
+  );
+
+  return listFrames(dir, ext);
 }
 
-// Get the timestamp (in seconds) for each extracted frame based on filename
-export function getFrameTimestamp(
-  filename: string,
-  intervalSeconds?: number,
-  startIndex: number = 0
-): number {
-  // Filenames like frame_0000000001.jpg where the number is the frame index
-  const match = filename.match(/frame_(\d+)\.jpg/);
-  if (!match) return 0;
+// ─── 4. Frame count (evenly distributed) ────────────────────────────────────
 
-  const frameNum = parseInt(match[1], 10);
+export async function extractFramesByCount(
+  videoPath: string,
+  sessionId: string,
+  frameCount: number,
+  quality = 85,
+  format = "jpg",
+  startTime?: string,
+  endTime?: string
+): Promise<string[]> {
+  const meta = await getVideoMetadata(videoPath);
+  const start = startTime ? timestampToSeconds(startTime) : 0;
+  const end = endTime ? timestampToSeconds(endTime) : meta.duration;
+  const duration = Math.max(0, end - start);
 
-  if (intervalSeconds !== undefined) {
-    // For interval mode: frame_N corresponds to N*interval seconds
-    // Frame numbers start at 1 in FFmpeg output
-    return (frameNum - 1 + startIndex) * intervalSeconds;
-  } else {
-    // For timestamp mode: the frameNum encodes seconds * 1000
-    return frameNum / 1000;
+  if (frameCount <= 1) {
+    // Just grab the middle frame
+    const mid = secondsToTimestamp(start + duration / 2);
+    const fn = await extractFrameAtTimestamp(videoPath, sessionId, mid, quality, format);
+    return [fn];
   }
+
+  // Distribute timestamps evenly
+  const timestamps: string[] = [];
+  for (let i = 0; i < frameCount; i++) {
+    const t = start + (duration / (frameCount - 1)) * i;
+    timestamps.push(secondsToTimestamp(Math.min(t, end)));
+  }
+
+  return extractMultipleTimestamps(videoPath, sessionId, timestamps, quality, format);
 }
 
-// Compute a simple sharpness score using Laplacian variance via FFmpeg
-// Returns a score 0-100 (higher = sharper)
+// ─── 5. Smart extraction (scene-change or interval + scoring) ────────────────
+
+export async function extractSmartFrames(
+  videoPath: string,
+  sessionId: string,
+  options: {
+    detectSceneChanges?: boolean;
+    avoidBlurry?: boolean;
+    preferBright?: boolean;
+    quality?: number;
+    format?: string;
+    startTime?: string;
+    endTime?: string;
+  }
+): Promise<string[]> {
+  const dir = await ensureSessionDir(sessionId);
+  const { quality = 85, format = "jpg", startTime, endTime, detectSceneChanges } = options;
+  const ext = formatExt(format);
+  const pattern = path.join(dir, `frame_%010d.${ext}`);
+
+  const ssFlag = startTime ? `-ss "${startTime}"` : "";
+  const toFlag = endTime ? `-to "${endTime}"` : "";
+
+  let encArgs = format === "png"
+    ? `-compression_level 3`
+    : format === "webp"
+    ? `-quality ${quality}`
+    : `-q:v ${qualityToQv(quality)}`;
+
+  if (detectSceneChanges) {
+    // Use FFmpeg scene-change detection — select frames where scene score > 0.35
+    await execAsync(
+      `ffmpeg -y ${ssFlag} ${toFlag} -i "${videoPath}" -vf "select='gt(scene,0.35)',setpts=N/FRAME_RATE/TB" -vsync vfr ${encArgs} "${pattern}"`
+    );
+  } else {
+    // Extract 1 fps as a baseline for smart scoring
+    await execAsync(
+      `ffmpeg -y ${ssFlag} ${toFlag} -i "${videoPath}" -vf "fps=1" ${encArgs} "${pattern}"`
+    );
+  }
+
+  return listFrames(dir, ext);
+}
+
+// ─── Frame timestamp from filename ──────────────────────────────────────────
+
+export function getFrameTimestamp(filename: string, intervalSeconds?: number): number {
+  const match = filename.match(/frame_(\d+)\./);
+  if (!match) return 0;
+  const n = parseInt(match[1], 10);
+  if (intervalSeconds !== undefined) return (n - 1) * intervalSeconds;
+  return n / 1000;
+}
+
+// ─── Sharpness & brightness scoring ─────────────────────────────────────────
+
 export async function computeSharpness(framePath: string): Promise<number> {
   try {
-    // Use FFmpeg to compute the Laplacian-like measure via blurdetect filter
-    // blurdetect outputs a "blur" metric; low blur = high sharpness
     const cmd = `ffprobe -v error -select_streams v:0 -show_entries frame_tags=lavfi.blur -f lavfi -i "movie=${framePath},blurdetect=high=0.01:block_pct=10" 2>&1 | head -20`;
     const { stdout } = await execAsync(cmd);
-
-    // Parse blur value from output
     const match = stdout.match(/lavfi\.blur=([0-9.]+)/);
-    if (match) {
-      const blur = parseFloat(match[1]);
-      // blur ranges roughly 0 (not blurry) to 1 (very blurry)
-      // Convert to sharpness: higher = sharper
-      return Math.max(0, Math.min(100, (1 - blur) * 100));
-    }
-
-    return 50; // Default if we can't compute
+    if (match) return Math.max(0, Math.min(100, (1 - parseFloat(match[1])) * 100));
+    return 50;
   } catch {
-    return 50; // Default on error
+    return 50;
   }
 }
 
-// Compute brightness by sampling pixel values via FFmpeg
-// Returns a score 0-100 (higher = brighter)
 export async function computeBrightness(framePath: string): Promise<number> {
   try {
-    // Use FFmpeg to get mean luminance
     const cmd = `ffprobe -v error -select_streams v:0 -show_entries frame_tags=lavfi.signalstats.YAVG -f lavfi -i "movie=${framePath},signalstats=stat=tout+vrep+brng" 2>&1`;
     const { stdout } = await execAsync(cmd);
-
     const match = stdout.match(/lavfi\.signalstats\.YAVG=([0-9.]+)/);
-    if (match) {
-      // YAVG is mean luma 0-255
-      const yavg = parseFloat(match[1]);
-      return Math.round((yavg / 255) * 100);
-    }
-
-    return 50; // Default
+    if (match) return Math.round((parseFloat(match[1]) / 255) * 100);
+    return 50;
   } catch {
-    return 50; // Default on error
+    return 50;
   }
 }
 
-// Convert hh:mm:ss or mm:ss or ss to seconds
-export function timestampToSeconds(ts: string): number {
-  const parts = ts.split(":").map(Number);
-  if (parts.length === 3) {
-    return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  } else if (parts.length === 2) {
-    return parts[0] * 60 + parts[1];
-  }
-  return parts[0] || 0;
-}
+// ─── Cleanup ─────────────────────────────────────────────────────────────────
 
-// Clean up session files (video + frames)
 export async function cleanupSession(sessionId: string, videoPath: string) {
-  try {
-    await fs.unlink(videoPath);
-  } catch {
-    // Ignore if file doesn't exist
-  }
-  try {
-    const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
-    await fs.rm(sessionFramesDir, { recursive: true, force: true });
-  } catch {
-    // Ignore
-  }
+  try { await fs.unlink(videoPath); } catch {}
+  try { await fs.rm(path.join(FRAMES_DIR, sessionId), { recursive: true, force: true }); } catch {}
 }
 
-// Auto-cleanup sessions older than the given age (milliseconds)
-export async function cleanupOldSessions(maxAgeMs: number = 3600000) {
+export async function cleanupOldSessions(maxAgeMs = 3_600_000) {
   try {
     const now = Date.now();
-    const framesDir = FRAMES_DIR;
-    const entries = await fs.readdir(framesDir, { withFileTypes: true });
-
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const sessionPath = path.join(framesDir, entry.name);
-        const stat = await fs.stat(sessionPath);
-        if (now - stat.mtimeMs > maxAgeMs) {
-          await fs.rm(sessionPath, { recursive: true, force: true });
-        }
-      }
+    for (const entry of await fs.readdir(FRAMES_DIR, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const p = path.join(FRAMES_DIR, entry.name);
+      if (now - (await fs.stat(p)).mtimeMs > maxAgeMs)
+        await fs.rm(p, { recursive: true, force: true });
     }
-
-    // Also clean up uploads
-    const uploadEntries = await fs.readdir(UPLOADS_DIR);
-    for (const file of uploadEntries) {
-      const filePath = path.join(UPLOADS_DIR, file);
-      const stat = await fs.stat(filePath);
-      if (now - stat.mtimeMs > maxAgeMs) {
-        await fs.unlink(filePath).catch(() => {});
-      }
+    for (const file of await fs.readdir(UPLOADS_DIR)) {
+      const p = path.join(UPLOADS_DIR, file);
+      if (now - (await fs.stat(p)).mtimeMs > maxAgeMs)
+        await fs.unlink(p).catch(() => {});
     }
-  } catch {
-    // Ignore errors during cleanup
-  }
+  } catch {}
 }
-
-export { UPLOADS_DIR, FRAMES_DIR };

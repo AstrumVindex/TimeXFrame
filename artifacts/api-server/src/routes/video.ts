@@ -10,10 +10,12 @@ import {
   getVideoMetadata,
   extractFrameAtTimestamp,
   extractFramesAtInterval,
+  extractMultipleTimestamps,
+  extractFramesByCount,
+  extractSmartFrames,
   getFrameTimestamp,
   computeSharpness,
   computeBrightness,
-  timestampToSeconds,
   UPLOADS_DIR,
   FRAMES_DIR,
 } from "../services/ffmpeg.js";
@@ -97,15 +99,36 @@ router.post(
 // POST /extract - Extract frames from uploaded video
 router.post("/extract", async (req: Request, res: Response) => {
   try {
-    const { sessionId, mode, timestamp, interval, quality = 85 } = req.body;
+    const {
+      sessionId,
+      mode,
+      // Interval mode
+      interval,
+      startTime,
+      endTime,
+      // Timestamp mode
+      timestamp,
+      timestamps,
+      // Frame count mode
+      frameCount,
+      // Smart mode
+      avoidBlurry,
+      preferBright,
+      detectSceneChanges,
+      // Output
+      quality = 85,
+      format = "jpg",
+      skipFirstSeconds,
+    } = req.body;
 
     if (!sessionId) {
       res.status(400).json({ error: "Missing sessionId", message: "Session ID is required." });
       return;
     }
 
-    if (!mode || !["timestamp", "interval"].includes(mode)) {
-      res.status(400).json({ error: "Invalid mode", message: "Mode must be 'timestamp' or 'interval'." });
+    const validModes = ["timestamp", "interval", "framecount", "smart"];
+    if (!mode || !validModes.includes(mode)) {
+      res.status(400).json({ error: "Invalid mode", message: `Mode must be one of: ${validModes.join(", ")}.` });
       return;
     }
 
@@ -120,25 +143,50 @@ router.post("/extract", async (req: Request, res: Response) => {
 
     const videoPath = path.join(UPLOADS_DIR, videoFile);
     let filenames: string[] = [];
-    let intervalSeconds: number | undefined;
+
+    // Resolve effective startTime when skipFirstSeconds is set
+    const effectiveStartTime = skipFirstSeconds && !startTime
+      ? new Date(skipFirstSeconds * 1000).toISOString().substr(11, 8)
+      : startTime;
 
     if (mode === "timestamp") {
-      if (!timestamp) {
-        res.status(400).json({ error: "Missing timestamp", message: "Timestamp is required for timestamp mode." });
+      // Support multiple timestamps
+      const tsList: string[] = Array.isArray(timestamps) && timestamps.length
+        ? timestamps
+        : timestamp ? [timestamp] : [];
+
+      if (!tsList.length) {
+        res.status(400).json({ error: "Missing timestamp", message: "At least one timestamp is required." });
         return;
       }
-      // Extract single frame at timestamp
-      const filename = await extractFrameAtTimestamp(videoPath, sessionId, timestamp, quality);
-      filenames = [filename];
-    } else {
-      // Interval mode
+      filenames = await extractMultipleTimestamps(videoPath, sessionId, tsList, quality, format);
+
+    } else if (mode === "interval") {
       const iv = parseFloat(interval);
       if (isNaN(iv) || iv <= 0) {
         res.status(400).json({ error: "Invalid interval", message: "Interval must be a positive number in seconds." });
         return;
       }
-      intervalSeconds = iv;
-      filenames = await extractFramesAtInterval(videoPath, sessionId, iv, quality);
+      filenames = await extractFramesAtInterval(videoPath, sessionId, iv, quality, format, effectiveStartTime, endTime);
+
+    } else if (mode === "framecount") {
+      const n = parseInt(frameCount, 10);
+      if (isNaN(n) || n < 1 || n > 200) {
+        res.status(400).json({ error: "Invalid frameCount", message: "Frame count must be between 1 and 200." });
+        return;
+      }
+      filenames = await extractFramesByCount(videoPath, sessionId, n, quality, format, effectiveStartTime, endTime);
+
+    } else if (mode === "smart") {
+      filenames = await extractSmartFrames(videoPath, sessionId, {
+        quality,
+        format,
+        detectSceneChanges: !!detectSceneChanges,
+        avoidBlurry: !!avoidBlurry,
+        preferBright: !!preferBright,
+        startTime: effectiveStartTime,
+        endTime,
+      });
     }
 
     const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
@@ -147,25 +195,24 @@ router.post("/extract", async (req: Request, res: Response) => {
     const frames = await Promise.all(
       filenames.map(async (filename, idx) => {
         const framePath = path.join(sessionFramesDir, filename);
-        const frameTimestamp =
-          mode === "timestamp"
-            ? timestampToSeconds(timestamp)
-            : getFrameTimestamp(filename, intervalSeconds, 0);
 
-        // Compute quality metrics for smart suggestions
         const [sharpness, brightness] = await Promise.all([
           computeSharpness(framePath),
           computeBrightness(framePath),
         ]);
 
-        // Mark as suggested if both sharpness and brightness are above thresholds
-        const suggested = sharpness >= 40 && brightness >= 20 && brightness <= 85;
+        // Smart mode: apply user-chosen filters as scoring
+        let suggested = sharpness >= 40 && brightness >= 20 && brightness <= 85;
+        if (mode === "smart") {
+          if (avoidBlurry && sharpness < 35) suggested = false;
+          if (preferBright && (brightness < 15 || brightness > 90)) suggested = false;
+        }
 
         return {
           id: `${sessionId}_${idx}`,
           filename,
           url: `/api/frames/${sessionId}/${filename}`,
-          timestamp: frameTimestamp,
+          timestamp: getFrameTimestamp(filename),
           suggested,
           sharpness: Math.round(sharpness),
           brightness: Math.round(brightness),
@@ -173,11 +220,8 @@ router.post("/extract", async (req: Request, res: Response) => {
       })
     );
 
-    res.json({
-      sessionId,
-      frameCount: frames.length,
-      frames,
-    });
+    res.json({ sessionId, frameCount: frames.length, frames });
+
   } catch (err) {
     req.log?.error({ err }, "Extract error");
     res.status(500).json({
