@@ -1,0 +1,152 @@
+1. FULL PAGE STRUCTURE (what you should add)
+
+Your page should follow this order:
+
+Header
+Hero (already done ✅)
+Features Section
+How It Works
+Use Cases (SEO booster)
+FAQ Section
+Footer
+🧭 2. HEADER (Simple but professional)
+What to add:
+Logo (FrameSnap)
+Links:
+Home
+Features
+How it Works
+FAQ
+CTA button: “Extract Frames”
+Example:
+[Logo]   Features   How it Works   FAQ       [Extract Frames]
+
+👉 Keep it sticky (fixed top)
+
+✨ 3. FEATURES SECTION (SEO + Value)
+Title:
+
+“Powerful Frame Extraction Tools”
+
+Add 4–6 feature cards:
+🎯 Precise Frame Capture
+⚡ Fast Processing
+📦 Bulk Download
+🧠 Smart Frame Suggestions
+🎥 Supports Multiple Formats
+💡 Example content (you can copy)
+Precise Frame Capture
+Extract frames at exact timestamps with high accuracy.
+Smart Suggestions
+Automatically highlights the best frames based on clarity.
+
+👉 This section helps Google understand your product
+
+⚙️ 4. HOW IT WORKS (Very important)
+Title:
+
+“How to Extract Frames in 3 Steps”
+
+Steps:
+Upload your video
+Select frame options
+Download frames instantly
+🎯 Add icons + numbers (1,2,3)
+
+👉 This improves user clarity + engagement
+
+🎯 5. USE CASES (SECRET SEO WEAPON)
+
+Most beginners skip this — big mistake.
+
+Title:
+
+“Who is this tool for?”
+
+Add:
+🎬 YouTube Creators
+📱 Instagram Content Creators
+🎨 Designers
+🎓 Students & Researchers
+Example:
+
+YouTube Creators
+Find the perfect thumbnail from your video instantly.
+
+👉 This helps you rank for:
+
+“thumbnail extractor”
+“frame from video for youtube”
+❓ 6. FAQ SECTION (VERY IMPORTANT for SEO)
+Title:
+
+“Frequently Asked Questions”
+
+Add these questions:
+1. How do I extract frames from a video?
+
+You can upload your video, select timestamps or intervals, and download frames instantly.
+
+2. Is this tool free?
+
+Yes, FrameSnap is completely free to use.
+
+3. What video formats are supported?
+
+MP4, MOV, and WEBM formats are supported.
+
+4. Does it reduce quality?
+
+No, frames are extracted in original quality.
+
+5. Is my video محفوظ (safe)?
+
+Your video is processed securely and automatically deleted after processing.
+
+👉 FAQ = huge SEO boost (Google loves this)
+
+🦶 7. FOOTER (Don’t ignore this)
+Add:
+Logo + short description
+Links:
+About
+Privacy Policy
+Terms
+Contact
+Example:
+FrameSnap – Fast video frame extractor tool.
+
+© 2026 FrameSnap
+Privacy | Terms | Contact
+📈 8. SEO OPTIMIZATION (VERY IMPORTANT)
+
+Add this to your page:
+
+🔑 Title Tag:
+Free Video Frame Extractor Online | Extract Frames from Video - FrameSnap
+📝 Meta Description:
+Extract high-quality frames from videos instantly. Free online video frame extractor with smart selection and bulk download.
+🧠 Keywords:
+video frame extractor
+extract frames from video
+video to image converter
+thumbnail extractor
+🎨 DESIGN IMPROVEMENT (for your current UI)
+
+Your current design is good but:
+
+Improve:
+Add more spacing between sections
+Slight shadow on cards
+Hover effects on buttons
+Add subtle divider lines
+
+👉 Keep it minimal (you already did this right)
+
+🚀 FINAL RESULT (what you’re building)
+
+You’re not building just a tool.
+
+You’re building:
+
+🔥 A searchable SaaS landing page that can rank on Google
