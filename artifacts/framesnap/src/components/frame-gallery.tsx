@@ -36,6 +36,51 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
 
   const { mutate: downloadZip, isPending: isZipping } = useDownloadZip();
 
+  // Delete a single frame — defined before any early returns (Rules of Hooks)
+  const handleDeleteFrame = useCallback(
+    async (frame: Frame, e: React.MouseEvent) => {
+      e.stopPropagation();
+      try {
+        const res = await fetch(`/api/frames/${session.sessionId}/${frame.id}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) throw new Error("Delete failed");
+        setDeletedIds((prev) => new Set([...prev, frame.id]));
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(frame.id);
+          return next;
+        });
+        toast({ title: "Frame removed", description: `Deleted frame at ${formatTime(frame.timestamp)}.` });
+      } catch {
+        toast({ title: "Delete failed", description: "Could not remove frame.", variant: "destructive" });
+      }
+    },
+    [session.sessionId]
+  );
+
+  // Delete all selected frames in bulk — also defined before early returns
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setIsDeletingBulk(true);
+    try {
+      const res = await fetch(`/api/frames/${session.sessionId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ frameIds: Array.from(selectedIds) }),
+      });
+      if (!res.ok) throw new Error("Bulk delete failed");
+      const count = selectedIds.size;
+      setDeletedIds((prev) => new Set([...prev, ...selectedIds]));
+      setSelectedIds(new Set());
+      toast({ title: `${count} frame${count > 1 ? "s" : ""} removed`, description: "Selected frames have been deleted." });
+    } catch {
+      toast({ title: "Delete failed", description: "Could not remove selected frames.", variant: "destructive" });
+    } finally {
+      setIsDeletingBulk(false);
+    }
+  }, [session.sessionId, selectedIds]);
+
   if (!hasExtracted) {
     return (
       <div className="w-full py-20 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-100 rounded-2xl bg-zinc-50/50">
@@ -101,51 +146,6 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
         },
       }
     );
-  };
-
-  // Delete a single frame
-  const handleDeleteFrame = useCallback(
-    async (frame: Frame, e: React.MouseEvent) => {
-      e.stopPropagation();
-      try {
-        const res = await fetch(`/api/frames/${session.sessionId}/${frame.id}`, {
-          method: "DELETE",
-        });
-        if (!res.ok) throw new Error("Delete failed");
-        setDeletedIds((prev) => new Set([...prev, frame.id]));
-        setSelectedIds((prev) => {
-          const next = new Set(prev);
-          next.delete(frame.id);
-          return next;
-        });
-        toast({ title: "Frame removed", description: `Deleted frame at ${formatTime(frame.timestamp)}.` });
-      } catch {
-        toast({ title: "Delete failed", description: "Could not remove frame.", variant: "destructive" });
-      }
-    },
-    [session.sessionId]
-  );
-
-  // Delete all selected frames in bulk
-  const handleBulkDelete = async () => {
-    if (selectedIds.size === 0) return;
-    setIsDeletingBulk(true);
-    try {
-      const res = await fetch(`/api/frames/${session.sessionId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ frameIds: Array.from(selectedIds) }),
-      });
-      if (!res.ok) throw new Error("Bulk delete failed");
-      const count = selectedIds.size;
-      setDeletedIds((prev) => new Set([...prev, ...selectedIds]));
-      setSelectedIds(new Set());
-      toast({ title: `${count} frame${count > 1 ? "s" : ""} removed`, description: "Selected frames have been deleted." });
-    } catch {
-      toast({ title: "Delete failed", description: "Could not remove selected frames.", variant: "destructive" });
-    } finally {
-      setIsDeletingBulk(false);
-    }
   };
 
   return (
