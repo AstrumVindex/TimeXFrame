@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Api
   version: 0.1.0
-  description: FrameSnap API specification
+  description: TimexFrame API specification
 servers:
   - url: /api
     description: Base API path
@@ -17,7 +17,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -31,7 +30,6 @@ paths:
       operationId: uploadVideo
       tags: [video]
       summary: Upload a video file
-      description: Upload a video file for frame extraction
       requestBody:
         required: true
         content:
@@ -42,8 +40,7 @@ paths:
                 video:
                   type: string
                   format: binary
-              required:
-                - video
+              required: [video]
       responses:
         "200":
           description: Video uploaded successfully
@@ -69,7 +66,6 @@ paths:
       operationId: extractFrames
       tags: [video]
       summary: Extract frames from uploaded video
-      description: Extract frames from a previously uploaded video
       requestBody:
         required: true
         content:
@@ -101,14 +97,12 @@ paths:
       operationId: getFrames
       tags: [video]
       summary: Get list of extracted frames
-      description: Returns list of extracted frames for a session
       parameters:
         - name: sessionId
           in: query
           required: true
           schema:
             type: string
-          description: Session ID from upload response
       responses:
         "200":
           description: List of frames
@@ -128,7 +122,6 @@ paths:
       operationId: downloadZip
       tags: [video]
       summary: Download selected frames as ZIP
-      description: Create and download a ZIP file of selected frames
       requestBody:
         required: true
         content:
@@ -157,60 +150,82 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     UploadResponse:
       type: object
       properties:
         sessionId:
           type: string
-          description: Unique session ID for this upload
         filename:
           type: string
-          description: Original filename
         duration:
           type: number
-          description: Video duration in seconds
         width:
           type: integer
-          description: Video width in pixels
         height:
           type: integer
-          description: Video height in pixels
         size:
           type: integer
-          description: File size in bytes
-      required:
-        - sessionId
-        - filename
-        - duration
-        - size
+      required: [sessionId, filename, duration, size]
 
     ExtractRequest:
       type: object
       properties:
         sessionId:
           type: string
-          description: Session ID from upload
         mode:
           type: string
-          enum: [timestamp, interval]
-          description: Extraction mode
-        timestamp:
-          type: string
-          description: Specific timestamp (hh:mm:ss) for timestamp mode
+          enum: [timestamp, interval, framecount, smart]
+          description: "Extraction mode: interval, timestamp, framecount, or smart"
+        # Interval mode
         interval:
           type: number
-          description: Interval in seconds for interval mode
+          description: Interval in seconds (interval mode)
+        startTime:
+          type: string
+          description: Start time HH:MM:SS (optional, interval/framecount modes)
+        endTime:
+          type: string
+          description: End time HH:MM:SS (optional, interval/framecount modes)
+        # Timestamp mode - single or multiple
+        timestamp:
+          type: string
+          description: Single timestamp HH:MM:SS (legacy)
+        timestamps:
+          type: array
+          items:
+            type: string
+          description: Multiple timestamps HH:MM:SS for timestamp mode
+        # Frame count mode
+        frameCount:
+          type: integer
+          minimum: 1
+          maximum: 200
+          description: Total number of frames to extract evenly distributed
+        # Smart mode filters
+        avoidBlurry:
+          type: boolean
+          description: Filter out blurry frames
+        preferBright:
+          type: boolean
+          description: Prefer well-lit frames
+        detectSceneChanges:
+          type: boolean
+          description: Extract frames at scene change boundaries
+        # Output options
         quality:
           type: integer
           minimum: 1
           maximum: 100
-          description: JPEG quality 1-100
-      required:
-        - sessionId
-        - mode
+        format:
+          type: string
+          enum: [jpg, png, webp]
+          description: Output image format
+        skipFirstSeconds:
+          type: number
+          description: Skip first N seconds of video
+      required: [sessionId, mode]
 
     ExtractResponse:
       type: object
@@ -223,10 +238,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Frame"
-      required:
-        - sessionId
-        - frameCount
-        - frames
+      required: [sessionId, frameCount, frames]
 
     Frame:
       type: object
@@ -239,24 +251,13 @@ components:
           type: string
         timestamp:
           type: number
-          description: Timestamp in seconds
         suggested:
           type: boolean
-          description: Whether this frame is suggested (sharp and bright)
         sharpness:
           type: number
-          description: Sharpness score 0-100
         brightness:
           type: number
-          description: Brightness score 0-100
-      required:
-        - id
-        - filename
-        - url
-        - timestamp
-        - suggested
-        - sharpness
-        - brightness
+      required: [id, filename, url, timestamp, suggested, sharpness, brightness]
 
     FramesResponse:
       type: object
@@ -267,9 +268,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Frame"
-      required:
-        - sessionId
-        - frames
+      required: [sessionId, frames]
 
     DownloadZipRequest:
       type: object
@@ -280,10 +279,7 @@ components:
           type: array
           items:
             type: string
-          description: List of frame IDs to include in ZIP
-      required:
-        - sessionId
-        - frameIds
+      required: [sessionId, frameIds]
 
     ErrorResponse:
       type: object
@@ -292,6 +288,4 @@ components:
           type: string
         message:
           type: string
-      required:
-        - error
-        - message
+      required: [error, message]
