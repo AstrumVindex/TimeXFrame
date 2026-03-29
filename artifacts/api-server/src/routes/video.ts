@@ -263,6 +263,79 @@ router.get("/frames/:sessionId/:filename", async (req: Request, res: Response) =
   }
 });
 
+// DELETE /frames/:sessionId/:frameId - Delete a specific frame
+router.delete("/frames/:sessionId/:frameId", async (req: Request, res: Response) => {
+  try {
+    const { sessionId, frameId } = req.params;
+
+    // Validate no path traversal
+    if (sessionId.includes("..") || frameId.includes("..")) {
+      res.status(400).json({ error: "Invalid request", message: "Invalid parameters." });
+      return;
+    }
+
+    // frameId is in format "sessionId_idx" — resolve to filename
+    const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
+    const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
+    const sortedFiles = allFiles.filter((f) => f.endsWith(".jpg")).sort();
+
+    const idxStr = frameId.replace(`${sessionId}_`, "");
+    const idx = parseInt(idxStr, 10);
+
+    if (isNaN(idx) || idx < 0 || idx >= sortedFiles.length) {
+      res.status(404).json({ error: "Not found", message: "Frame not found." });
+      return;
+    }
+
+    const filename = sortedFiles[idx];
+    const framePath = path.join(sessionFramesDir, filename);
+
+    await fs.unlink(framePath);
+    res.json({ success: true, message: "Frame deleted." });
+  } catch (err) {
+    req.log?.error({ err }, "Delete frame error");
+    res.status(500).json({ error: "Delete failed", message: "Could not delete frame." });
+  }
+});
+
+// DELETE /frames/:sessionId - Delete multiple frames (bulk)
+router.delete("/frames/:sessionId", async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const { frameIds } = req.body as { frameIds: string[] };
+
+    if (!frameIds || !Array.isArray(frameIds) || frameIds.length === 0) {
+      res.status(400).json({ error: "Invalid request", message: "frameIds array is required." });
+      return;
+    }
+
+    if (sessionId.includes("..")) {
+      res.status(400).json({ error: "Invalid request", message: "Invalid session." });
+      return;
+    }
+
+    const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
+    const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
+    const sortedFiles = allFiles.filter((f) => f.endsWith(".jpg")).sort();
+
+    let deletedCount = 0;
+    for (const frameId of frameIds) {
+      const idxStr = frameId.replace(`${sessionId}_`, "");
+      const idx = parseInt(idxStr, 10);
+      if (!isNaN(idx) && idx >= 0 && idx < sortedFiles.length) {
+        const framePath = path.join(sessionFramesDir, sortedFiles[idx]);
+        await fs.unlink(framePath).catch(() => {});
+        deletedCount++;
+      }
+    }
+
+    res.json({ success: true, deleted: deletedCount });
+  } catch (err) {
+    req.log?.error({ err }, "Bulk delete error");
+    res.status(500).json({ error: "Delete failed", message: "Could not delete frames." });
+  }
+});
+
 // POST /download-zip - Download selected frames as ZIP
 router.post("/download-zip", async (req: Request, res: Response) => {
   try {
