@@ -1,0 +1,85 @@
+Fix two issues in my existing web app "TimeXFrame" (video frame extractor tool) with minimal CPU usage and optimized for Replit.
+
+IMPORTANT:
+- Keep everything lightweight (low memory + low CPU)
+- Do NOT redesign the entire app
+- Only fix the specific issues cleanly
+- Maintain current minimal UI style
+
+-----------------------------------
+ISSUE 1: Frame Preview (Frontend)
+-----------------------------------
+
+Problem:
+- Extracted frames are displayed but cannot be previewed in full screen
+
+Solution:
+- Add a lightweight image preview modal (no external libraries)
+
+Requirements:
+- On clicking any frame → open fullscreen modal
+- Show:
+  - Large image preview
+  - Timestamp label
+  - Close (X) button
+- Close modal on:
+  - ESC key
+  - Clicking outside image
+
+Performance rules:
+- Do NOT reload images (reuse existing URLs)
+- Use simple React state only
+- Avoid heavy animations
+
+-----------------------------------
+ISSUE 2: Timestamp Extraction Not Working
+-----------------------------------
+
+Problem:
+- Frames are not generated when using timestamp mode
+
+Fix:
+
+1. Use correct FFmpeg command (accurate seeking):
+   - Place `-ss` AFTER `-i`
+
+   Example:
+   ffmpeg -i input.mp4 -ss 00:00:01 -frames:v 1 frame_1.jpg
+
+2. Process timestamps ONE BY ONE (sequentially)
+   - Avoid parallel execution to reduce CPU usage on Replit
+
+3. Implement async/await loop:
+   - Wait for each FFmpeg process to complete before starting next
+
+4. Limit max timestamps to 10 to prevent overload
+
+5. Add error handling:
+   - If one timestamp fails → log error → continue next
+
+-----------------------------------
+PERFORMANCE OPTIMIZATION (VERY IMPORTANT)
+-----------------------------------
+
+- Default JPEG quality = 90%
+- Limit max frames (e.g. 50 for interval mode)
+- Automatically delete temp files after processing
+- Avoid storing duplicate frames
+- Ensure backend returns only required data (URLs + timestamps)
+
+-----------------------------------
+OUTPUT REQUIRED:
+-----------------------------------
+
+- Updated React code for preview modal (minimal)
+- Updated Node.js backend function for timestamp extraction
+- Clean, beginner-friendly code with comments
+
+-----------------------------------
+DO NOT INCLUDE:
+-----------------------------------
+
+- No authentication system
+- No database
+- No heavy libraries
+- No UI redesign

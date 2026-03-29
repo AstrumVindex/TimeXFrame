@@ -150,10 +150,12 @@ router.post("/extract", async (req: Request, res: Response) => {
       : startTime;
 
     if (mode === "timestamp") {
-      // Support multiple timestamps
-      const tsList: string[] = Array.isArray(timestamps) && timestamps.length
+      // Support multiple timestamps — cap at 10 to prevent CPU overload
+      let tsList: string[] = Array.isArray(timestamps) && timestamps.length
         ? timestamps
         : timestamp ? [timestamp] : [];
+
+      tsList = tsList.slice(0, 10);
 
       if (!tsList.length) {
         res.status(400).json({ error: "Missing timestamp", message: "At least one timestamp is required." });

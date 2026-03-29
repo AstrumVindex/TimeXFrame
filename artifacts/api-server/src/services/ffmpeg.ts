@@ -88,7 +88,8 @@ export async function extractFrameAtTimestamp(
     ? `-quality ${quality}`
     : `-q:v ${qualityToQv(quality)}`;
 
-  await execAsync(`ffmpeg -y -ss "${timestamp}" -i "${videoPath}" -vframes 1 ${encArgs} "${out}"`);
+  // -ss placed AFTER -i for accurate (frame-accurate) seeking
+  await execAsync(`ffmpeg -y -i "${videoPath}" -ss "${timestamp}" -frames:v 1 ${encArgs} "${out}"`);
   return filename;
 }
 
