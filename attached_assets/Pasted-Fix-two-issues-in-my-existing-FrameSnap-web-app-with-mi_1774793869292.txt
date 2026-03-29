@@ -1,0 +1,78 @@
+Fix two issues in my existing FrameSnap web app with minimal resource usage and efficient backend execution.
+
+IMPORTANT:
+- Optimize for low CPU usage (Replit environment)
+- Avoid running multiple heavy FFmpeg processes in parallel
+- Keep code simple and efficient
+- Do not redesign entire app, only fix issues
+
+-----------------------------------
+ISSUE 1: Frame Preview (Frontend)
+-----------------------------------
+
+Add a lightweight image preview modal (no heavy libraries).
+
+Requirements:
+- When user clicks a frame → open full-screen modal
+- Show:
+  - Large image
+  - Timestamp
+  - Close button
+- Close on:
+  - Click outside OR press ESC
+
+Constraints:
+- Use simple React state (no external modal libraries)
+- Do not load images again (reuse existing URLs)
+- Keep DOM minimal
+
+-----------------------------------
+ISSUE 2: Timestamp Mode Not Working
+-----------------------------------
+
+Fix backend FFmpeg logic for timestamp extraction.
+
+Current problem:
+- Frames not generated when using timestamps
+
+Solution requirements:
+
+1. Use accurate seeking:
+   - Place `-ss` AFTER `-i`
+
+2. Process timestamps SEQUENTIALLY (NOT parallel)
+   - Prevent CPU spikes on Replit
+
+3. Use async/await or Promise-based execution
+
+4. Example correct logic:
+
+Loop through timestamps one by one:
+- Run FFmpeg
+- Wait until it finishes
+- Then process next timestamp
+
+5. Example FFmpeg command:
+   ffmpeg -i input.mp4 -ss 00:00:05 -frames:v 1 frame_1.jpg
+
+6. Add error handling:
+   - If FFmpeg fails, log error and continue next timestamp
+
+-----------------------------------
+PERFORMANCE OPTIMIZATION (IMPORTANT)
+-----------------------------------
+
+- Limit max timestamps to 10 (to save resources)
+- Reduce image quality slightly if needed (default 90%)
+- Clean temporary files after processing
+- Do not store unnecessary duplicates
+
+-----------------------------------
+RESPONSE FORMAT:
+-----------------------------------
+
+- Provide only updated code snippets:
+  1. React modal component (preview)
+  2. Backend timestamp extraction function (Node.js)
+- Keep code minimal and beginner-friendly
+- Add short comments explaining logic

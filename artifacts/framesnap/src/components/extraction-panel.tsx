@@ -154,7 +154,7 @@ export function ExtractionPanel({ session, onExtracted }: ExtractionPanelProps) 
   }
 
   // ── Timestamp list helpers ───────────────────────────────────────────────────
-  const addTimestamp = () => setTimestamps((p) => [...p, ""]);
+  const addTimestamp = () => setTimestamps((p) => p.length < 10 ? [...p, ""] : p);
   const removeTimestamp = (i: number) => setTimestamps((p) => p.filter((_, j) => j !== i));
   const updateTimestamp = (i: number, v: string) =>
     setTimestamps((p) => p.map((t, j) => (j === i ? v : t)));

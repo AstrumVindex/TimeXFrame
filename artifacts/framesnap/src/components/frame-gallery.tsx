@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetFrames, useDownloadZip } from "@workspace/api-client-react";
 import type { UploadResponse, Frame } from "@workspace/api-client-react";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon } from "lucide-react";
+import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon, Expand, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface FrameGalleryProps {
@@ -22,12 +22,74 @@ function formatTime(seconds: number) {
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
 }
 
+// ─── Lightbox Modal ───────────────────────────────────────────────────────────
+
+interface LightboxProps {
+  frame: Frame | null;
+  onClose: () => void;
+}
+
+function Lightbox({ frame, onClose }: LightboxProps) {
+  // Close on ESC key
+  useEffect(() => {
+    if (!frame) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [frame, onClose]);
+
+  if (!frame) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-5xl w-full mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute -top-10 right-0 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
+        >
+          <X className="w-4 h-4" /> Close
+        </button>
+
+        {/* Image — reuses existing URL, no re-download */}
+        <img
+          src={frame.url}
+          alt={`Frame at ${formatTime(frame.timestamp)}`}
+          className="w-full rounded-xl shadow-2xl object-contain max-h-[80vh]"
+        />
+
+        {/* Timestamp label */}
+        <div className="absolute bottom-4 left-4 px-3 py-1 rounded-lg bg-black/70 backdrop-blur text-white text-sm font-mono">
+          {formatTime(frame.timestamp)}
+        </div>
+
+        {/* Suggested badge */}
+        {frame.suggested && (
+          <div className="absolute top-4 left-4">
+            <Badge className="bg-amber-100/90 text-amber-800 border-amber-200 text-xs">
+              <Sparkles className="w-3 h-3 mr-1" /> Suggested
+            </Badge>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Gallery ─────────────────────────────────────────────────────────────
+
 export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showSuggestedOnly, setShowSuggestedOnly] = useState(false);
-  // Track locally deleted frame IDs so UI updates instantly without refetch
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [previewFrame, setPreviewFrame] = useState<Frame | null>(null);
 
   const { data: framesData, isLoading } = useGetFrames(
     { sessionId: session.sessionId },
@@ -36,21 +98,15 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
 
   const { mutate: downloadZip, isPending: isZipping } = useDownloadZip();
 
-  // Delete a single frame — defined before any early returns (Rules of Hooks)
+  // Delete a single frame
   const handleDeleteFrame = useCallback(
     async (frame: Frame, e: React.MouseEvent) => {
       e.stopPropagation();
       try {
-        const res = await fetch(`/api/frames/${session.sessionId}/${frame.id}`, {
-          method: "DELETE",
-        });
+        const res = await fetch(`/api/frames/${session.sessionId}/${frame.id}`, { method: "DELETE" });
         if (!res.ok) throw new Error("Delete failed");
         setDeletedIds((prev) => new Set([...prev, frame.id]));
-        setSelectedIds((prev) => {
-          const next = new Set(prev);
-          next.delete(frame.id);
-          return next;
-        });
+        setSelectedIds((prev) => { const next = new Set(prev); next.delete(frame.id); return next; });
         toast({ title: "Frame removed", description: `Deleted frame at ${formatTime(frame.timestamp)}.` });
       } catch {
         toast({ title: "Delete failed", description: "Could not remove frame.", variant: "destructive" });
@@ -59,7 +115,7 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
     [session.sessionId]
   );
 
-  // Delete all selected frames in bulk — also defined before early returns
+  // Bulk delete selected frames
   const handleBulkDelete = useCallback(async () => {
     if (selectedIds.size === 0) return;
     setIsDeletingBulk(true);
@@ -73,7 +129,7 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
       const count = selectedIds.size;
       setDeletedIds((prev) => new Set([...prev, ...selectedIds]));
       setSelectedIds(new Set());
-      toast({ title: `${count} frame${count > 1 ? "s" : ""} removed`, description: "Selected frames have been deleted." });
+      toast({ title: `${count} frame${count > 1 ? "s" : ""} removed` });
     } catch {
       toast({ title: "Delete failed", description: "Could not remove selected frames.", variant: "destructive" });
     } finally {
@@ -89,7 +145,7 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
         </div>
         <h3 className="text-xl font-semibold text-zinc-900 mb-2">No frames yet</h3>
         <p className="text-muted-foreground max-w-[300px]">
-          Configure your settings above and click "Extract Frames" to begin.
+          Configure your settings above and click "Start Extraction" to begin.
         </p>
       </div>
     );
@@ -150,6 +206,9 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
 
   return (
     <div className="space-y-6 relative pb-24">
+      {/* Lightbox modal */}
+      <Lightbox frame={previewFrame} onClose={() => setPreviewFrame(null)} />
+
       {/* Header row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -179,9 +238,7 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
             onClick={handleSelectAll}
             className="hidden sm:flex text-sm font-medium"
           >
-            {selectedIds.size === visibleFrames.length && visibleFrames.length > 0
-              ? "Deselect All"
-              : "Select All"}
+            {selectedIds.size === visibleFrames.length && visibleFrames.length > 0 ? "Deselect All" : "Select All"}
           </Button>
         </div>
       </div>
@@ -215,20 +272,10 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
                 />
 
                 {/* Dark overlay on hover/selected */}
-                <div
-                  className={`
-                    absolute inset-0 transition-colors duration-300 pointer-events-none
-                    ${isSelected ? "bg-black/10" : "bg-black/0 group-hover:bg-black/25"}
-                  `}
-                />
+                <div className={`absolute inset-0 transition-colors duration-300 pointer-events-none ${isSelected ? "bg-black/10" : "bg-black/0 group-hover:bg-black/25"}`} />
 
                 {/* Checkbox top-right */}
-                <div
-                  className={`
-                    absolute top-2.5 right-2.5 transition-opacity duration-200 z-10
-                    ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
-                  `}
-                >
+                <div className={`absolute top-2.5 right-2.5 transition-opacity duration-200 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={() => toggleSelection(frame.id)}
@@ -236,24 +283,32 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
                   />
                 </div>
 
-                {/* Delete button top-left (shows on hover when NOT selected) */}
+                {/* Action buttons top-left (on hover, not selected) */}
                 {!isSelected && (
-                  <button
-                    onClick={(e) => handleDeleteFrame(frame, e)}
-                    className="absolute top-2.5 left-2.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-red-500 text-white"
-                    title="Remove frame"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="absolute top-2.5 left-2.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
+                    {/* Delete */}
+                    <button
+                      onClick={(e) => handleDeleteFrame(frame, e)}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-red-500 text-white transition-colors"
+                      title="Remove frame"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    {/* Preview / fullscreen */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPreviewFrame(frame); }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
+                      title="Preview fullscreen"
+                    >
+                      <Expand className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 )}
 
                 {/* Suggested badge */}
                 {frame.suggested && !isSelected && (
                   <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
-                    <Badge
-                      variant="secondary"
-                      className="bg-amber-100/90 backdrop-blur-sm text-amber-800 border-amber-200 shadow-sm font-medium text-[10px] px-1.5 py-0.5"
-                    >
+                    <Badge variant="secondary" className="bg-amber-100/90 backdrop-blur-sm text-amber-800 border-amber-200 shadow-sm font-medium text-[10px] px-1.5 py-0.5">
                       <Sparkles className="w-2.5 h-2.5 mr-1" /> Suggested
                     </Badge>
                   </div>
@@ -287,43 +342,31 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
             <span className="font-semibold text-sm">{selectedIds.size} selected</span>
             <div className="w-px h-5 bg-zinc-700" />
 
-            {/* Clear */}
             <Button
-              variant="ghost"
-              size="sm"
+              variant="ghost" size="sm"
               className="text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-full text-sm"
               onClick={() => setSelectedIds(new Set())}
             >
               Clear
             </Button>
 
-            {/* Bulk delete */}
             <Button
               size="sm"
               className="bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold"
               onClick={handleBulkDelete}
               disabled={isDeletingBulk}
             >
-              {isDeletingBulk ? (
-                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4 mr-1.5" />
-              )}
+              {isDeletingBulk ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Trash2 className="w-4 h-4 mr-1.5" />}
               Delete
             </Button>
 
-            {/* Download ZIP */}
             <Button
               size="sm"
               className="bg-white text-zinc-900 hover:bg-zinc-100 rounded-full font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]"
               onClick={handleDownloadZip}
               disabled={isZipping}
             >
-              {isZipping ? (
-                <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-1.5" />
-              )}
+              {isZipping ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Download className="w-4 h-4 mr-1.5" />}
               Download ZIP
             </Button>
           </motion.div>
