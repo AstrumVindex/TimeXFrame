@@ -179,7 +179,7 @@ export function UseCasesSection() {
           <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">Use cases</p>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">Who Is This Tool For?</h2>
           <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
-            FrameSnap is built for anyone who works with video.
+            TimexFrame is built for anyone who works with video.
           </p>
         </div>
 
@@ -213,7 +213,7 @@ const FAQS = [
   },
   {
     q: "Is this tool free?",
-    a: "Yes — FrameSnap is completely free to use with no account required.",
+    a: "Yes — TimexFrame is completely free to use with no account required.",
   },
   {
     q: "What video formats are supported?",
@@ -229,7 +229,7 @@ const FAQS = [
   },
   {
     q: "What are Smart Suggestions?",
-    a: "FrameSnap automatically analyses each frame for sharpness and brightness. Frames that score well are marked with a ✨ Suggested badge so you can quickly find the best ones.",
+    a: "TimexFrame automatically analyses each frame for sharpness and brightness. Frames that score well are marked with a ✨ Suggested badge so you can quickly find the best ones.",
   },
 ];
 
@@ -288,7 +288,7 @@ export function Footer() {
               <div className="bg-zinc-900 text-white p-1 rounded-md">
                 <Frame className="w-4 h-4" />
               </div>
-              FrameSnap
+              TimexFrame
             </div>
             <p className="text-xs text-zinc-400">Fast, free video frame extractor tool.</p>
           </div>
@@ -301,7 +301,7 @@ export function Footer() {
           </nav>
 
           {/* Copyright */}
-          <p className="text-xs text-zinc-400">© {new Date().getFullYear()} FrameSnap. All rights reserved.</p>
+          <p className="text-xs text-zinc-400">© {new Date().getFullYear()} TimexFrame. All rights reserved.</p>
         </div>
       </div>
     </footer>
