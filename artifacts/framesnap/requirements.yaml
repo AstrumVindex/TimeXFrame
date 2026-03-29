@@ -1,0 +1,11 @@
+packages:
+  "react-dropzone": "For drag-and-drop video uploads"
+  "framer-motion": "For premium smooth layout transitions and micro-interactions"
+  "lucide-react": "For beautiful consistent iconography"
+  "clsx": "For conditional tailwind classes"
+  "tailwind-merge": "For merging tailwind classes"
+
+notes:
+  - Using generated API hooks from @workspace/api-client-react
+  - Video preview uses native HTML5 video element with createObjectURL to avoid re-downloading
+  - Frame images are served natively through the API endpoint

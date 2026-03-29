@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FrameSnap API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: video
+    description: Video upload and frame extraction
 paths:
   /healthz:
     get:
@@ -24,6 +25,131 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /upload:
+    post:
+      operationId: uploadVideo
+      tags: [video]
+      summary: Upload a video file
+      description: Upload a video file for frame extraction
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+              required:
+                - video
+      responses:
+        "200":
+          description: Video uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "413":
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /extract:
+    post:
+      operationId: extractFrames
+      tags: [video]
+      summary: Extract frames from uploaded video
+      description: Extract frames from a previously uploaded video
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractRequest"
+      responses:
+        "200":
+          description: Frames extracted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /frames:
+    get:
+      operationId: getFrames
+      tags: [video]
+      summary: Get list of extracted frames
+      description: Returns list of extracted frames for a session
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Session ID from upload response
+      responses:
+        "200":
+          description: List of frames
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FramesResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /download-zip:
+    post:
+      operationId: downloadZip
+      tags: [video]
+      summary: Download selected frames as ZIP
+      description: Create and download a ZIP file of selected frames
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DownloadZipRequest"
+      responses:
+        "200":
+          description: ZIP file download
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +160,138 @@ components:
       required:
         - status
 
+    UploadResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Unique session ID for this upload
+        filename:
+          type: string
+          description: Original filename
+        duration:
+          type: number
+          description: Video duration in seconds
+        width:
+          type: integer
+          description: Video width in pixels
+        height:
+          type: integer
+          description: Video height in pixels
+        size:
+          type: integer
+          description: File size in bytes
+      required:
+        - sessionId
+        - filename
+        - duration
+        - size
+
+    ExtractRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: Session ID from upload
+        mode:
+          type: string
+          enum: [timestamp, interval]
+          description: Extraction mode
+        timestamp:
+          type: string
+          description: Specific timestamp (hh:mm:ss) for timestamp mode
+        interval:
+          type: number
+          description: Interval in seconds for interval mode
+        quality:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: JPEG quality 1-100
+      required:
+        - sessionId
+        - mode
+
+    ExtractResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        frameCount:
+          type: integer
+        frames:
+          type: array
+          items:
+            $ref: "#/components/schemas/Frame"
+      required:
+        - sessionId
+        - frameCount
+        - frames
+
+    Frame:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        url:
+          type: string
+        timestamp:
+          type: number
+          description: Timestamp in seconds
+        suggested:
+          type: boolean
+          description: Whether this frame is suggested (sharp and bright)
+        sharpness:
+          type: number
+          description: Sharpness score 0-100
+        brightness:
+          type: number
+          description: Brightness score 0-100
+      required:
+        - id
+        - filename
+        - url
+        - timestamp
+        - suggested
+        - sharpness
+        - brightness
+
+    FramesResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        frames:
+          type: array
+          items:
+            $ref: "#/components/schemas/Frame"
+      required:
+        - sessionId
+        - frames
+
+    DownloadZipRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        frameIds:
+          type: array
+          items:
+            type: string
+          description: List of frame IDs to include in ZIP
+      required:
+        - sessionId
+        - frameIds
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message

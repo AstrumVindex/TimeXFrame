@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { ensureDirectories, cleanupOldSessions } from "./services/ffmpeg.js";
 
 const rawPort = process.env["PORT"];
 
@@ -14,6 +15,14 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+// Ensure upload/frames directories exist at startup
+await ensureDirectories();
+
+// Auto-cleanup old sessions every 30 minutes (1 hour max age)
+setInterval(() => {
+  cleanupOldSessions(3600000).catch(() => {});
+}, 30 * 60 * 1000);
 
 app.listen(port, (err) => {
   if (err) {

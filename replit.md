@@ -21,7 +21,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ```text
 artifacts-monorepo/
 ├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
+│   ├── api-server/         # Express API server
+│   └── framesnap/          # FrameSnap React frontend
 ├── lib/                    # Shared libraries
 │   ├── api-spec/           # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/   # Generated React Query hooks
@@ -34,6 +35,46 @@ artifacts-monorepo/
 ├── tsconfig.json           # Root TS project references
 └── package.json            # Root package with hoisted devDeps
 ```
+
+## Applications
+
+### FrameSnap (`artifacts/framesnap`)
+
+A clean, minimal SaaS-style video frame extractor tool.
+
+**Features:**
+- Drag-and-drop video upload (MP4, MOV, WEBM up to 100MB)
+- Video preview player
+- Frame extraction: timestamp mode (hh:mm:ss) or interval mode (every X seconds)
+- Frame gallery grid with download and selection
+- Bulk ZIP download of selected frames
+- Smart "Suggested" frame detection (sharpness + brightness scoring)
+
+**Frontend:** React + Vite + Tailwind CSS + shadcn/ui
+- Components: `layout-header`, `video-uploader`, `video-preview`, `extraction-panel`, `frame-gallery`
+- Pages: `home.tsx`
+
+### API Server (`artifacts/api-server`)
+
+Express 5 backend serving all FrameSnap functionality.
+
+**Routes:**
+- `POST /api/upload` — Video upload via multer, returns sessionId + metadata
+- `POST /api/extract` — FFmpeg frame extraction (timestamp or interval mode)
+- `GET /api/frames?sessionId=xxx` — List extracted frames
+- `GET /api/frames/:sessionId/:filename` — Serve frame images
+- `POST /api/download-zip` — Download selected frames as ZIP (archiver)
+
+**Services:**
+- `src/services/ffmpeg.ts` — FFmpeg integration (extract frames, compute sharpness/brightness, cleanup)
+- `src/routes/video.ts` — Video upload, extraction, and download routes
+
+**Key dependencies:** multer (uploads), archiver (ZIP), sharp (externalized), ffmpeg (system)
+
+**File storage:**
+- `artifacts/api-server/uploads/` — Temporary video uploads
+- `artifacts/api-server/frames/` — Extracted frames per session
+- Auto-cleanup: sessions older than 1 hour are deleted every 30 minutes
 
 ## TypeScript & Composite Projects
 

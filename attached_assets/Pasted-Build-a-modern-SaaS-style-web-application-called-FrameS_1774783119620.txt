@@ -1,0 +1,116 @@
+Build a modern SaaS-style web application called "FrameSnap" – a clean and minimal video frame extractor tool.
+
+IMPORTANT REQUIREMENTS:
+- No authentication (no login/signup)
+- No payment/subscription system
+- Minimal UI (light theme, soft gray/white colors, no flashy gradients)
+- Fast and lightweight
+- Mobile responsive
+
+TECH STACK:
+- Frontend: React (Vite) + Tailwind CSS
+- Backend: Node.js + Express
+- Video Processing: FFmpeg (server-side)
+
+CORE FEATURES:
+
+1. Video Upload
+- Allow users to upload video files (MP4, MOV, WEBM)
+- Show upload progress
+- Limit file size (e.g., 100MB)
+
+2. Video Preview Player
+- Display uploaded video
+- Add timeline slider
+- Show current timestamp
+
+3. Frame Extraction
+- Extract frames using:
+  a) Specific timestamp input (hh:mm:ss)
+  b) Interval mode (every X seconds)
+- Use FFmpeg on backend
+
+4. Frame Gallery
+- Show extracted frames in grid layout
+- Each frame has:
+  - Download button
+  - Select checkbox
+
+5. Bulk Download
+- Allow selecting multiple frames
+- Download as ZIP
+
+6. Smart Frame Selection (LIGHT AI LOGIC – no heavy ML)
+- Automatically highlight:
+  - Sharp frames (basic blur detection)
+  - Bright frames (simple brightness check)
+- Mark them as "Suggested"
+
+7. Clean UI Design
+- Minimal SaaS layout
+- Top navbar (logo + simple links)
+- Centered upload area
+- Card-based frame grid
+- Use subtle shadows, rounded corners
+- Colors: white, light gray, black (no heavy colors)
+
+8. Loading States
+- Show loader while processing video
+- Disable UI during processing
+
+9. Error Handling
+- Show proper error messages
+- Handle unsupported formats
+
+BACKEND REQUIREMENTS:
+
+- Use multer for file uploads
+- Store files temporarily
+- Use FFmpeg to:
+  - Extract frames
+  - Save frames to a folder
+- Create API endpoints:
+  - POST /upload
+  - POST /extract
+  - GET /frames
+  - GET /download-zip
+
+- Auto-delete files after some time
+
+PROJECT STRUCTURE:
+
+/client (React app)
+/server
+  /routes
+  /controllers
+  /services (FFmpeg logic)
+  /uploads
+  /frames
+
+UI DETAILS:
+
+- Large drag & drop upload box
+- Progress bar
+- Video player with controls
+- Grid layout (3–5 columns responsive)
+- Hover effect on frames
+- Clean buttons (no bright colors)
+
+EXTRA (IMPORTANT):
+
+- Code should be clean and modular
+- Add comments for beginner understanding
+- Make it easy to deploy (Railway / Render)
+
+OUTPUT:
+
+- Full frontend + backend code
+- Step-by-step setup instructions
+- .env example
+- FFmpeg installation guide
+
+Do NOT include:
+- Authentication
+- Payment system
+- Complex AI models
+- Over-designed UI
