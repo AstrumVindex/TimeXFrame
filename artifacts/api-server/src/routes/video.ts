@@ -253,7 +253,7 @@ router.get("/frames", async (req: Request, res: Response) => {
     }
 
     const files = await fs.readdir(sessionFramesDir);
-    const jpgFiles = files.filter((f) => f.endsWith(".jpg")).sort();
+    const jpgFiles = files.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
 
     const frames = jpgFiles.map((filename, idx) => ({
       id: `${sessionId}_${idx}`,
@@ -284,7 +284,7 @@ router.get("/frames/:sessionId/:filename", async (req: Request, res: Response) =
     if (
       sessionId.includes("..") ||
       filename.includes("..") ||
-      !filename.endsWith(".jpg")
+      !/\.(jpg|png|webp)$/.test(filename)
     ) {
       res.status(400).json({ error: "Invalid request", message: "Invalid file path." });
       return;
@@ -299,7 +299,10 @@ router.get("/frames/:sessionId/:filename", async (req: Request, res: Response) =
       return;
     }
 
-    res.setHeader("Content-Type", "image/jpeg");
+    const contentType = filename.endsWith(".png") ? "image/png"
+      : filename.endsWith(".webp") ? "image/webp"
+      : "image/jpeg";
+    res.setHeader("Content-Type", contentType);
     res.setHeader("Cache-Control", "public, max-age=3600");
     const stream = createReadStream(framePath);
     stream.pipe(res);
@@ -323,7 +326,7 @@ router.delete("/frames/:sessionId/:frameId", async (req: Request, res: Response)
     // frameId is in format "sessionId_idx" — resolve to filename
     const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
     const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
-    const sortedFiles = allFiles.filter((f) => f.endsWith(".jpg")).sort();
+    const sortedFiles = allFiles.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
 
     const idxStr = frameId.replace(`${sessionId}_`, "");
     const idx = parseInt(idxStr, 10);
@@ -362,7 +365,7 @@ router.delete("/frames/:sessionId", async (req: Request, res: Response) => {
 
     const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
     const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
-    const sortedFiles = allFiles.filter((f) => f.endsWith(".jpg")).sort();
+    const sortedFiles = allFiles.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
 
     let deletedCount = 0;
     for (const frameId of frameIds) {
@@ -399,7 +402,7 @@ router.post("/download-zip", async (req: Request, res: Response) => {
 
     // Get list of all frames
     const allFiles = await fs.readdir(sessionFramesDir);
-    const sortedFiles = allFiles.filter((f) => f.endsWith(".jpg")).sort();
+    const sortedFiles = allFiles.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
 
     // Map frame IDs to filenames (id = sessionId_idx)
     const selectedFiles: string[] = [];

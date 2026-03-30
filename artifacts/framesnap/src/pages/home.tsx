@@ -24,9 +24,19 @@ export default function Home() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleNewUpload = () => {
+    setSession(null);
+    setLocalFile(null);
+    setHasExtracted(false);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
-      <Header onExtractClick={scrollToUpload} />
+      <Header
+        onExtractClick={scrollToUpload}
+        isWorkspace={!!session}
+        onNewUpload={handleNewUpload}
+      />
 
       <main>
         <AnimatePresence mode="wait" initial={false}>
