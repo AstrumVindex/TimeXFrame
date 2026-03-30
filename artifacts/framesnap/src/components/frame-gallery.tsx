@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon, Expand, X } from "lucide-react";
+import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon, Expand, X, ArrowDownToLine } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface FrameGalleryProps {
@@ -20,6 +20,17 @@ function formatTime(seconds: number) {
   const s = Math.floor(seconds % 60);
   const ms = Math.floor((seconds % 1) * 1000);
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}.${ms.toString().padStart(3, "0")}`;
+}
+
+// ─── Direct single-frame download ────────────────────────────────────────────
+
+function downloadFrame(frame: Frame) {
+  const a = document.createElement("a");
+  a.href = frame.url;
+  a.download = frame.filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
 
 // ─── Lightbox Modal ───────────────────────────────────────────────────────────
@@ -49,15 +60,26 @@ function Lightbox({ frame, onClose }: LightboxProps) {
         className="relative max-w-5xl w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute -top-10 right-0 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
-        >
-          <X className="w-4 h-4" /> Close
-        </button>
+        {/* Top bar: close + download */}
+        <div className="absolute -top-11 left-0 right-0 flex items-center justify-between">
+          <span className="text-white/50 text-xs font-mono">{frame.filename}</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => downloadFrame(frame)}
+              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
+            >
+              <ArrowDownToLine className="w-4 h-4" /> Download
+            </button>
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
+            >
+              <X className="w-4 h-4" /> Close
+            </button>
+          </div>
+        </div>
 
-        {/* Image — reuses existing URL, no re-download */}
+        {/* Image — reuses existing URL, no re-fetch */}
         <img
           src={frame.url}
           alt={`Frame at ${formatTime(frame.timestamp)}`}
@@ -290,7 +312,7 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
                     <button
                       onClick={(e) => handleDeleteFrame(frame, e)}
                       className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-red-500 text-white transition-colors"
-                      title="Remove frame"
+                      title="Delete frame"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -301,6 +323,14 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
                       title="Preview fullscreen"
                     >
                       <Expand className="w-3.5 h-3.5" />
+                    </button>
+                    {/* Direct download */}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); downloadFrame(frame); }}
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
+                      title="Download this frame"
+                    >
+                      <ArrowDownToLine className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}
