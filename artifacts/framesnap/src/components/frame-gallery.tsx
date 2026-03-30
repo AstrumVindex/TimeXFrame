@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetFrames, useDownloadZip } from "@workspace/api-client-react";
 import type { UploadResponse, Frame } from "@workspace/api-client-react";
@@ -117,6 +117,18 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
     { sessionId: session.sessionId },
     { query: { enabled: hasExtracted } }
   );
+
+  // When a fresh extraction runs the backend clears old files — reset local
+  // deletion marks so previously-deleted IDs don't hide the new frames.
+  const prevFrameCountRef = useRef<number>(0);
+  useEffect(() => {
+    const newCount = framesData?.frames?.length ?? 0;
+    if (newCount > 0 && newCount !== prevFrameCountRef.current) {
+      setDeletedIds(new Set());
+      setSelectedIds(new Set());
+      prevFrameCountRef.current = newCount;
+    }
+  }, [framesData]);
 
   const { mutate: downloadZip, isPending: isZipping } = useDownloadZip();
 
