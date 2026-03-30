@@ -1,11 +1,13 @@
-import { Frame } from "lucide-react";
+import { Frame, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
   onExtractClick?: () => void;
+  isWorkspace?: boolean;
+  onNewUpload?: () => void;
 }
 
-export function Header({ onExtractClick }: HeaderProps) {
+export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps) {
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -26,39 +28,53 @@ export function Header({ onExtractClick }: HeaderProps) {
           TimexFrame
         </a>
 
-        {/* Nav links */}
-        <nav className="hidden md:flex items-center gap-6">
-          <a
-            href="#features"
-            onClick={(e) => { e.preventDefault(); scrollTo("features"); }}
-            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-          >
-            Features
-          </a>
-          <a
-            href="#how-it-works"
-            onClick={(e) => { e.preventDefault(); scrollTo("how-it-works"); }}
-            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-          >
-            How It Works
-          </a>
-          <a
-            href="#faq"
-            onClick={(e) => { e.preventDefault(); scrollTo("faq"); }}
-            className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-          >
-            FAQ
-          </a>
-        </nav>
+        {/* Landing nav links — hidden in workspace mode */}
+        {!isWorkspace && (
+          <nav className="hidden md:flex items-center gap-6">
+            <a
+              href="#features"
+              onClick={(e) => { e.preventDefault(); scrollTo("features"); }}
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={(e) => { e.preventDefault(); scrollTo("how-it-works"); }}
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              How It Works
+            </a>
+            <a
+              href="#faq"
+              onClick={(e) => { e.preventDefault(); scrollTo("faq"); }}
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              FAQ
+            </a>
+          </nav>
+        )}
 
-        {/* CTA */}
-        <Button
-          size="sm"
-          className="bg-zinc-900 hover:bg-zinc-700 text-white rounded-lg font-semibold shadow-sm"
-          onClick={() => scrollTo("upload")}
-        >
-          Extract Frames
-        </Button>
+        {/* CTA — "New Upload" in workspace, "Extract Frames" on landing */}
+        {isWorkspace ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-zinc-300 text-zinc-700 hover:bg-zinc-50 rounded-lg font-semibold"
+            onClick={onNewUpload}
+          >
+            <UploadCloud className="w-4 h-4 mr-2" />
+            New Upload
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            className="bg-zinc-900 hover:bg-zinc-700 text-white rounded-lg font-semibold shadow-sm"
+            onClick={() => scrollTo("upload")}
+          >
+            Extract Frames
+          </Button>
+        )}
       </div>
     </header>
   );
