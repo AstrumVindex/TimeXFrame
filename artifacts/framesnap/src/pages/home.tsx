@@ -18,6 +18,7 @@ export default function Home() {
   const [session, setSession] = useState<UploadResponse | null>(null);
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [hasExtracted, setHasExtracted] = useState(false);
+  const [extractionVersion, setExtractionVersion] = useState(0);
 
   const scrollToUpload = () => {
     const el = document.getElementById("upload");
@@ -28,6 +29,7 @@ export default function Home() {
     setSession(null);
     setLocalFile(null);
     setHasExtracted(false);
+    setExtractionVersion(0);
   };
 
   return (
@@ -109,6 +111,7 @@ export default function Home() {
                   setSession(null);
                   setLocalFile(null);
                   setHasExtracted(false);
+                  setExtractionVersion(0);
                 }}
                 className="text-sm text-zinc-400 hover:text-zinc-700 transition-colors flex items-center gap-1"
               >
@@ -125,14 +128,21 @@ export default function Home() {
                 <div className="lg:col-span-5 xl:col-span-4">
                   <ExtractionPanel
                     session={session}
-                    onExtracted={() => setHasExtracted(true)}
+                    onExtracted={() => {
+                      setHasExtracted(true);
+                      setExtractionVersion((v) => v + 1);
+                    }}
                   />
                 </div>
               </section>
 
               {/* Frame gallery */}
               <section className="pt-8 border-t border-zinc-100">
-                <FrameGallery session={session} hasExtracted={hasExtracted} />
+                <FrameGallery
+                  session={session}
+                  hasExtracted={hasExtracted}
+                  extractionVersion={extractionVersion}
+                />
               </section>
 
               {/* Compact footer in workspace mode */}

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetFrames, useDownloadZip } from "@workspace/api-client-react";
 import type { UploadResponse, Frame } from "@workspace/api-client-react";
@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 interface FrameGalleryProps {
   session: UploadResponse;
   hasExtracted: boolean;
+  extractionVersion: number;
 }
 
 function formatTime(seconds: number) {
@@ -106,7 +107,7 @@ function Lightbox({ frame, onClose }: LightboxProps) {
 
 // ─── Main Gallery ─────────────────────────────────────────────────────────────
 
-export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
+export function FrameGallery({ session, hasExtracted, extractionVersion }: FrameGalleryProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showSuggestedOnly, setShowSuggestedOnly] = useState(false);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
@@ -118,17 +119,13 @@ export function FrameGallery({ session, hasExtracted }: FrameGalleryProps) {
     { query: { enabled: hasExtracted } }
   );
 
-  // When a fresh extraction runs the backend clears old files — reset local
-  // deletion marks so previously-deleted IDs don't hide the new frames.
-  const prevFrameCountRef = useRef<number>(0);
+  // Each time the user triggers a new extraction the backend wipes old files,
+  // so any locally-tracked deletion marks are now stale — clear them.
   useEffect(() => {
-    const newCount = framesData?.frames?.length ?? 0;
-    if (newCount > 0 && newCount !== prevFrameCountRef.current) {
-      setDeletedIds(new Set());
-      setSelectedIds(new Set());
-      prevFrameCountRef.current = newCount;
-    }
-  }, [framesData]);
+    if (extractionVersion === 0) return;
+    setDeletedIds(new Set());
+    setSelectedIds(new Set());
+  }, [extractionVersion]);
 
   const { mutate: downloadZip, isPending: isZipping } = useDownloadZip();
 
