@@ -144,6 +144,17 @@ router.post("/extract", async (req: Request, res: Response) => {
     const videoPath = path.join(UPLOADS_DIR, videoFile);
     let filenames: string[] = [];
 
+    // Clear previous frames for this session so each extraction starts fresh
+    const sessionFramesDirForClean = path.join(FRAMES_DIR, sessionId);
+    try {
+      const existingFiles = await fs.readdir(sessionFramesDirForClean);
+      await Promise.all(
+        existingFiles
+          .filter((f) => /\.(jpg|png|webp)$/.test(f))
+          .map((f) => fs.unlink(path.join(sessionFramesDirForClean, f)).catch(() => {}))
+      );
+    } catch {}
+
     // Resolve effective startTime when skipFirstSeconds is set
     const effectiveStartTime = skipFirstSeconds && !startTime
       ? new Date(skipFirstSeconds * 1000).toISOString().substr(11, 8)
@@ -265,6 +276,9 @@ router.get("/frames", async (req: Request, res: Response) => {
       brightness: 50,
     }));
 
+    // Prevent HTTP caching so the gallery always reflects the latest extraction
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
     res.json({ sessionId, frames });
   } catch (err) {
     req.log?.error({ err }, "Get frames error");
