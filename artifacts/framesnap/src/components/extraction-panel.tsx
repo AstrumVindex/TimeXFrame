@@ -60,7 +60,6 @@ export function ExtractionPanel({ session, onExtracted }: ExtractionPanelProps) 
   const [detectScenes, setDetectScenes] = useState(false);
 
   // Output settings
-  const [quality, setQuality] = useState(90);
   const [format, setFormat] = useState<"jpg" | "png" | "webp">("jpg");
 
   // Advanced
@@ -125,7 +124,6 @@ export function ExtractionPanel({ session, onExtracted }: ExtractionPanelProps) 
     const basePayload = {
       sessionId: session.sessionId,
       mode,
-      quality,
       format,
       startTime: startTime || undefined,
       endTime: endTime || undefined,
@@ -141,9 +139,8 @@ export function ExtractionPanel({ session, onExtracted }: ExtractionPanelProps) 
     extractFrames(
       { data: { ...basePayload, ...modePayload } as any },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetFramesQueryKey({ sessionId: session.sessionId }) });
-          toast({ title: "Extraction complete", description: `Extracted ${data.frameCount} frames.` });
           onExtracted();
         },
         onError: () => {
@@ -363,24 +360,9 @@ export function ExtractionPanel({ session, onExtracted }: ExtractionPanelProps) 
             </div>
           </div>
 
-          {/* Quality (only for jpg/webp) */}
-          {format !== "png" && (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label className="text-xs font-semibold text-zinc-600 uppercase tracking-wide">
-                  Quality
-                  <Tip text="Higher quality means larger file sizes." />
-                </Label>
-                <span className="text-xs font-mono text-zinc-500">{quality}%</span>
-              </div>
-              <input
-                type="range" min="10" max="100" step="5"
-                value={quality}
-                onChange={(e) => setQuality(Number(e.target.value))}
-                className="w-full accent-zinc-800 h-1.5 rounded-full"
-              />
-            </div>
-          )}
+          <p className="text-[11px] text-zinc-500 leading-relaxed">
+            Frames are extracted at the video&apos;s original resolution and best available quality.
+          </p>
 
           {/* Advanced toggle */}
           <button

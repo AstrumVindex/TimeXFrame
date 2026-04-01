@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import {
   Crosshair,
   Zap,
@@ -98,7 +99,7 @@ const STEPS = [
     icon: SlidersHorizontal,
     step: "02",
     title: "Select Frame Options",
-    desc: "Choose a specific timestamp or extract frames at a regular interval. Adjust quality as needed.",
+    desc: "Choose a specific timestamp or extract frames at a regular interval. Original frame quality is preserved automatically.",
   },
   {
     icon: Download,
@@ -278,30 +279,54 @@ export function FAQSection() {
 /* ─── Footer ────────────────────────────────────────────────────────────────── */
 
 export function Footer() {
+  const baseUrl = import.meta.env.BASE_URL || "/";
+
   return (
     <footer className="border-t border-zinc-100 bg-zinc-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          {/* Logo + tagline */}
-          <div className="flex flex-col items-center md:items-start gap-1">
+        <div className="grid gap-8 md:grid-cols-[1.3fr_1fr_1fr_1fr] items-start">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2 font-bold text-zinc-900">
               <div className="bg-zinc-900 text-white p-1 rounded-md">
                 <Frame className="w-4 h-4" />
               </div>
               TimexFrame
             </div>
-            <p className="text-xs text-zinc-400">Fast, free video frame extractor tool.</p>
+            <p className="text-sm text-zinc-500 max-w-xs">
+              Fast, free video frame extraction for creators, students, and teams.
+            </p>
           </div>
 
-          {/* Links */}
-          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
-            <a href="#features" className="hover:text-zinc-700 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-zinc-700 transition-colors">How It Works</a>
-            <a href="#faq" className="hover:text-zinc-700 transition-colors">FAQ</a>
-          </nav>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Product</h3>
+            <nav className="space-y-2 text-sm text-zinc-500">
+              <a href={`${baseUrl}#features`} className="block hover:text-zinc-900 transition-colors">Features</a>
+              <a href={`${baseUrl}#how-it-works`} className="block hover:text-zinc-900 transition-colors">How It Works</a>
+              <a href={`${baseUrl}#faq`} className="block hover:text-zinc-900 transition-colors">FAQ</a>
+            </nav>
+          </div>
 
-          {/* Copyright */}
-          <p className="text-xs text-zinc-400">© {new Date().getFullYear()} TimexFrame. All rights reserved.</p>
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Resources</h3>
+            <nav className="space-y-2 text-sm text-zinc-500">
+              <Link href="/blog" className="block hover:text-zinc-900 transition-colors">Blog</Link>
+              <Link href="/about" className="block hover:text-zinc-900 transition-colors">About Us</Link>
+              <Link href="/contact" className="block hover:text-zinc-900 transition-colors">Contact</Link>
+            </nav>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-900 mb-3">Legal</h3>
+            <nav className="space-y-2 text-sm text-zinc-500">
+              <Link href="/privacy" className="block hover:text-zinc-900 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="block hover:text-zinc-900 transition-colors">Terms of Use</Link>
+              <Link href="/cookies" className="block hover:text-zinc-900 transition-colors">Cookie Policy</Link>
+            </nav>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-zinc-200 pt-4 text-xs text-zinc-400">
+          © {new Date().getFullYear()} TimexFrame. All rights reserved.
         </div>
       </div>
     </footer>

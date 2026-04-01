@@ -145,11 +145,20 @@ function truncate(text: string, maxLength = 300): string {
   return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
+function stripHtmlTags(text: string): string {
+  return text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function buildErrorMessage(response: Response, data: unknown): string {
   const prefix = `HTTP ${response.status} ${response.statusText}`;
 
   if (typeof data === "string") {
-    const text = data.trim();
+    const text = stripHtmlTags(data);
+
+    if (response.status === 413 || /request entity too large/i.test(text)) {
+      return `${prefix}: The uploaded file is too large for the current web upload limit.`;
+    }
+
     return text ? `${prefix}: ${truncate(text)}` : prefix;
   }
 

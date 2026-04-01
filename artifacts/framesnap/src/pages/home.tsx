@@ -12,6 +12,7 @@ import {
   FAQSection,
   Footer,
 } from "@/components/landing-sections";
+import { SeoHead } from "@/components/seo-head";
 import type { UploadResponse } from "@workspace/api-client-react";
 
 export default function Home() {
@@ -34,6 +35,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
+      <SeoHead
+        title="Free Video Frame Extractor Online"
+        description="Extract high-quality frames from MP4, MOV, and WEBM videos online. Use count, interval, or timestamp mode and download clean stills in seconds."
+        canonicalPath="/"
+        keywords={[
+          "free video frame extractor",
+          "extract frames from video online",
+          "video to image converter",
+          "thumbnail frame extractor",
+        ]}
+      />
       <Header
         onExtractClick={scrollToUpload}
         isWorkspace={!!session}
@@ -146,8 +158,19 @@ export default function Home() {
               </section>
 
               {/* Compact footer in workspace mode */}
-              <footer className="border-t border-zinc-100 pt-6 text-center text-xs text-zinc-400">
-                © {new Date().getFullYear()} TimexFrame — Fast, free video frame extractor.
+              <footer className="border-t border-zinc-100 pt-6">
+                <div className="flex flex-col gap-3 text-center md:flex-row md:items-center md:justify-between">
+                  <p className="text-xs text-zinc-400">
+                    © {new Date().getFullYear()} TimexFrame — Fast, free video frame extractor.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-500">
+                    <a href="/blog" className="hover:text-zinc-900 transition-colors">Blog</a>
+                    <a href="/about" className="hover:text-zinc-900 transition-colors">About Us</a>
+                    <a href="/contact" className="hover:text-zinc-900 transition-colors">Contact</a>
+                    <a href="/privacy" className="hover:text-zinc-900 transition-colors">Privacy</a>
+                    <a href="/terms" className="hover:text-zinc-900 transition-colors">Terms</a>
+                  </div>
+                </div>
               </footer>
             </motion.div>
           )}

@@ -15,6 +15,14 @@ export async function ensureDirectories() {
 
 // ─── Video metadata ─────────────────────────────────────────────────────────
 
+function parseFrameRate(rate?: string): number {
+  if (!rate || rate === "0/0") return 0;
+  const [num, den] = rate.split("/").map(Number);
+  if (Number.isFinite(num) && Number.isFinite(den) && den > 0) return num / den;
+  const direct = Number(rate);
+  return Number.isFinite(direct) ? direct : 0;
+}
+
 export async function getVideoMetadata(filePath: string) {
   const cmd = `ffprobe -v quiet -print_format json -show_streams -show_format "${filePath}"`;
   const { stdout } = await execAsync(cmd);
@@ -25,7 +33,9 @@ export async function getVideoMetadata(filePath: string) {
   let duration = parseFloat(videoStream.duration || "0");
   if (!duration) duration = parseFloat(data.format?.duration || "0");
 
-  return { duration, width: videoStream.width || 0, height: videoStream.height || 0 };
+  const fps = parseFrameRate(videoStream.avg_frame_rate || videoStream.r_frame_rate);
+
+  return { duration, width: videoStream.width || 0, height: videoStream.height || 0, fps };
 }
 
 // ─── Timestamp helpers ───────────────────────────────────────────────────────
@@ -38,10 +48,13 @@ export function timestampToSeconds(ts: string): number {
 }
 
 function secondsToTimestamp(s: number): string {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = Math.floor(s % 60);
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  const totalMs = Math.max(0, Math.round(s * 1000));
+  const h = Math.floor(totalMs / 3_600_000);
+  const m = Math.floor((totalMs % 3_600_000) / 60_000);
+  const sec = Math.floor((totalMs % 60_000) / 1000);
+  const ms = totalMs % 1000;
+
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
 }
 
 // Quality → FFmpeg qv (1 best, 31 worst)
@@ -157,19 +170,23 @@ export async function extractFramesByCount(
   const start = startTime ? timestampToSeconds(startTime) : 0;
   const end = endTime ? timestampToSeconds(endTime) : meta.duration;
   const duration = Math.max(0, end - start);
+  const frameStep = meta.fps > 0 ? 1 / meta.fps : Math.min(0.04, Math.max(duration / Math.max(frameCount, 1), 0.001));
+  const safeEnd = duration > frameStep ? end - frameStep : end;
+  const usableDuration = Math.max(0, safeEnd - start);
 
   if (frameCount <= 1) {
-    // Just grab the middle frame
-    const mid = secondsToTimestamp(start + duration / 2);
+    // Just grab the middle frame.
+    const mid = secondsToTimestamp(start + usableDuration / 2);
     const fn = await extractFrameAtTimestamp(videoPath, sessionId, mid, quality, format);
     return [fn];
   }
 
-  // Distribute timestamps evenly
+  // Sample from the middle of each evenly sized slice of the timeline.
   const timestamps: string[] = [];
+  const step = usableDuration / frameCount;
   for (let i = 0; i < frameCount; i++) {
-    const t = start + (duration / (frameCount - 1)) * i;
-    timestamps.push(secondsToTimestamp(Math.min(t, end)));
+    const t = start + step * (i + 0.5);
+    timestamps.push(secondsToTimestamp(Math.min(t, safeEnd)));
   }
 
   return extractMultipleTimestamps(videoPath, sessionId, timestamps, quality, format);

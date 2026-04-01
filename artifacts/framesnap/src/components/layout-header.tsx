@@ -1,3 +1,4 @@
+import { Link, useLocation } from "wouter";
 import { Frame, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -8,7 +9,15 @@ interface HeaderProps {
 }
 
 export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps) {
+  const [location] = useLocation();
+  const baseUrl = import.meta.env.BASE_URL || "/";
+
   const scrollTo = (id: string) => {
+    if (location !== "/") {
+      window.location.assign(`${baseUrl}#${id}`);
+      return;
+    }
+
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
     else if (onExtractClick && id === "upload") onExtractClick();
@@ -18,7 +27,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
     <header className="sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-xl">
       <div className="flex h-16 items-center px-4 md:px-6 max-w-7xl mx-auto justify-between">
         {/* Logo */}
-        <a
+        <Link
           href="/"
           className="flex items-center gap-2.5 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
         >
@@ -26,7 +35,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
             <Frame className="w-5 h-5" />
           </div>
           TimexFrame
-        </a>
+        </Link>
 
         {/* Landing nav links — hidden in workspace mode */}
         {!isWorkspace && (
@@ -52,6 +61,24 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
             >
               FAQ
             </a>
+            <Link
+              href="/blog"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              Blog
+            </Link>
+            <Link
+              href="/about"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              About Us
+            </Link>
+            <Link
+              href="/contact"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              Contact
+            </Link>
           </nav>
         )}
 

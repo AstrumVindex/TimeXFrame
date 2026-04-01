@@ -24,9 +24,19 @@ const router: IRouter = Router();
 
 // Max file size: 100MB
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const MAX_CHUNK_SIZE = 6 * 1024 * 1024;
+const CHUNK_UPLOADS_DIR = path.join(UPLOADS_DIR, ".chunks");
 
 // Allowed video MIME types
 const ALLOWED_MIME_TYPES = ["video/mp4", "video/quicktime", "video/webm"];
+
+function isAllowedVideoMimeType(mimeType: string | undefined): boolean {
+  return !!mimeType && ALLOWED_MIME_TYPES.includes(mimeType);
+}
+
+function isSafeUploadId(value: string): boolean {
+  return /^[a-zA-Z0-9_-]+$/.test(value);
+}
 
 // Configure multer for video uploads
 const storage = multer.diskStorage({
@@ -45,7 +55,7 @@ const upload = multer({
   storage,
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    if (isAllowedVideoMimeType(file.mimetype)) {
       cb(null, true);
     } else {
       cb(
@@ -55,6 +65,145 @@ const upload = multer({
       );
     }
   },
+});
+
+const chunkUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_CHUNK_SIZE },
+});
+
+router.post(
+  "/upload-chunk",
+  chunkUpload.single("chunk"),
+  async (req: Request, res: Response) => {
+    try {
+      const { uploadId, chunkIndex, totalChunks } = req.body;
+
+      if (!req.file) {
+        res.status(400).json({
+          error: "Missing chunk",
+          message: "No upload chunk was received.",
+        });
+        return;
+      }
+
+      if (typeof uploadId !== "string" || !isSafeUploadId(uploadId)) {
+        res.status(400).json({
+          error: "Invalid uploadId",
+          message: "Upload session ID is missing or invalid.",
+        });
+        return;
+      }
+
+      const index = Number.parseInt(String(chunkIndex), 10);
+      const total = Number.parseInt(String(totalChunks), 10);
+
+      if (!Number.isInteger(index) || index < 0 || !Number.isInteger(total) || total < 1) {
+        res.status(400).json({
+          error: "Invalid chunk info",
+          message: "Chunk index or total chunk count is invalid.",
+        });
+        return;
+      }
+
+      await ensureDirectories();
+      await fs.mkdir(CHUNK_UPLOADS_DIR, { recursive: true });
+
+      const chunkDir = path.join(CHUNK_UPLOADS_DIR, uploadId);
+      await fs.mkdir(chunkDir, { recursive: true });
+
+      const chunkPath = path.join(chunkDir, `${index.toString().padStart(5, "0")}.part`);
+      await fs.writeFile(chunkPath, req.file.buffer);
+
+      res.status(200).json({ ok: true, chunkIndex: index, totalChunks: total });
+    } catch (err) {
+      req.log?.error({ err }, "Upload chunk error");
+      res.status(500).json({
+        error: "Upload failed",
+        message:
+          err instanceof Error ? err.message : "Failed to store uploaded chunk.",
+      });
+    }
+  },
+);
+
+router.post("/upload-complete", async (req: Request, res: Response) => {
+  try {
+    const { uploadId, filename, totalChunks } = req.body;
+
+    if (typeof uploadId !== "string" || !isSafeUploadId(uploadId)) {
+      res.status(400).json({
+        error: "Invalid uploadId",
+        message: "Upload session ID is missing or invalid.",
+      });
+      return;
+    }
+
+    const total = Number.parseInt(String(totalChunks), 10);
+    if (!Number.isInteger(total) || total < 1) {
+      res.status(400).json({
+        error: "Invalid totalChunks",
+        message: "Total chunk count is invalid.",
+      });
+      return;
+    }
+
+    const chunkDir = path.join(CHUNK_UPLOADS_DIR, uploadId);
+    const partFiles = (await fs.readdir(chunkDir))
+      .filter((file) => file.endsWith(".part"))
+      .sort();
+
+    if (partFiles.length !== total) {
+      res.status(400).json({
+        error: "Incomplete upload",
+        message: `Expected ${total} chunks but received ${partFiles.length}. Please upload again.`,
+      });
+      return;
+    }
+
+    const originalName =
+      typeof filename === "string" && filename.trim() ? path.basename(filename) : "video.mp4";
+    const ext = path.extname(originalName) || ".mp4";
+    const finalPath = path.join(UPLOADS_DIR, `${uploadId}${ext}`);
+
+    await fs.rm(finalPath, { force: true }).catch(() => {});
+
+    for (const partFile of partFiles) {
+      const partPath = path.join(chunkDir, partFile);
+      const buffer = await fs.readFile(partPath);
+      await fs.appendFile(finalPath, buffer);
+    }
+
+    const stat = await fs.stat(finalPath);
+    if (stat.size > MAX_FILE_SIZE) {
+      await fs.rm(finalPath, { force: true }).catch(() => {});
+      await fs.rm(chunkDir, { recursive: true, force: true }).catch(() => {});
+      res.status(413).json({
+        error: "Upload failed",
+        message: "Please upload a video smaller than 100MB.",
+      });
+      return;
+    }
+
+    const metadata = await getVideoMetadata(finalPath);
+    await fs.rm(chunkDir, { recursive: true, force: true }).catch(() => {});
+
+    res.json({
+      sessionId: uploadId,
+      filename: originalName,
+      duration: metadata.duration,
+      width: metadata.width,
+      height: metadata.height,
+      size: stat.size,
+    });
+  } catch (err) {
+    req.log?.error({ err }, "Upload finalize error");
+    res.status(500).json({
+      error: "Upload failed",
+      message:
+        err instanceof Error ? err.message : "Failed to assemble uploaded video.",
+    });
+  }
 });
 
 // POST /upload - Upload a video file
@@ -116,7 +265,7 @@ router.post("/extract", async (req: Request, res: Response) => {
       preferBright,
       detectSceneChanges,
       // Output
-      quality = 85,
+      quality = 100,
       format = "jpg",
       skipFirstSeconds,
     } = req.body;
