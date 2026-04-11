@@ -5,26 +5,13 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const rawPort = process.env.PORT;
+const port = rawPort ? Number(rawPort) : 3000;
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
+if (rawPort && (Number.isNaN(port) || port <= 0)) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    "BASE_PATH environment variable is required but was not provided.",
-  );
-}
+const basePath = process.env.BASE_PATH ?? "/";
 
 const apiProxyTarget =
   process.env.VITE_API_PROXY_TARGET ??
@@ -71,6 +58,11 @@ export default defineConfig({
       "/api": {
         target: apiProxyTarget,
         changeOrigin: true,
+        // Ensure multipart/form-data uploads are not modified by the proxy
+        ws: true,
+        // Increase timeout for long-running operations like frame extraction (30 minutes)
+        timeout: 30 * 60 * 1000,
+        proxyTimeout: 30 * 60 * 1000,
       },
     },
     fs: {

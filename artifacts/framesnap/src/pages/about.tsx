@@ -16,13 +16,13 @@ const HIGHLIGHTS = [
     icon: Clock3,
     title: "Fast and simple workflow",
     description:
-      "Upload a video, choose how many frames you need, and review the results without installing any extra software.",
+      "Choose a video, pick how many frames you need, and review results without installing any extra software.",
   },
   {
     icon: ShieldCheck,
     title: "Privacy-first processing",
     description:
-      "Uploads are processed only for extraction and are automatically removed after a short retention window.",
+      "Video processing happens locally in your browser, so your source file stays on your device.",
   },
 ];
 

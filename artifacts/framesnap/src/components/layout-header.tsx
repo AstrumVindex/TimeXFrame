@@ -25,7 +25,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/90 backdrop-blur-xl">
-      <div className="flex h-16 items-center px-4 md:px-6 max-w-7xl mx-auto justify-between">
+      <div className="relative flex h-16 w-full items-center justify-between px-4 md:px-6 lg:px-8">
         {/* Logo */}
         <Link
           href="/"
@@ -39,28 +39,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
 
         {/* Landing nav links — hidden in workspace mode */}
         {!isWorkspace && (
-          <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="#features"
-              onClick={(e) => { e.preventDefault(); scrollTo("features"); }}
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              onClick={(e) => { e.preventDefault(); scrollTo("how-it-works"); }}
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#faq"
-              onClick={(e) => { e.preventDefault(); scrollTo("faq"); }}
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-            >
-              FAQ
-            </a>
+          <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
             <Link
               href="/blog"
               className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
@@ -82,7 +61,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
           </nav>
         )}
 
-        {/* CTA — "New Upload" in workspace, "Extract Frames" on landing */}
+        {/* CTA — "Choose New Video" in workspace, "Extract Frames" on landing */}
         {isWorkspace ? (
           <Button
             size="sm"
@@ -91,7 +70,7 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
             onClick={onNewUpload}
           >
             <UploadCloud className="w-4 h-4 mr-2" />
-            New Upload
+            Choose New Video
           </Button>
         ) : (
           <Button

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "@/components/layout-header";
 import { VideoUploader } from "@/components/video-uploader";
@@ -13,25 +13,53 @@ import {
   Footer,
 } from "@/components/landing-sections";
 import { SeoHead } from "@/components/seo-head";
-import type { UploadResponse } from "@workspace/api-client-react";
+import type { LocalSession, LocalFrame } from "@/lib/types";
 
 export default function Home() {
-  const [session, setSession] = useState<UploadResponse | null>(null);
+  const [session, setSession] = useState<LocalSession | null>(null);
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [hasExtracted, setHasExtracted] = useState(false);
   const [extractionVersion, setExtractionVersion] = useState(0);
+  const [extractedFrames, setExtractedFrames] = useState<LocalFrame[]>([]);
+  const [shouldScrollToUpload, setShouldScrollToUpload] = useState(false);
+  const [playheadTime, setPlayheadTime] = useState(0);
 
   const scrollToUpload = () => {
     const el = document.getElementById("upload");
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
+  const revokeIfBlobUrl = (url?: string) => {
+    if (url?.startsWith("blob:")) {
+      URL.revokeObjectURL(url);
+    }
+  };
+
   const handleNewUpload = () => {
+    // Revoke blob URLs to free memory
+    if (session) revokeIfBlobUrl(session.objectUrl);
+    extractedFrames.forEach((f) => revokeIfBlobUrl(f.url));
+
+    // Prevent browser from jumping back to old hash targets (e.g. #faq)
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+
     setSession(null);
     setLocalFile(null);
     setHasExtracted(false);
     setExtractionVersion(0);
+    setExtractedFrames([]);
+    setShouldScrollToUpload(true);
   };
+
+  useEffect(() => {
+    if (!shouldScrollToUpload || session) return;
+    requestAnimationFrame(() => {
+      scrollToUpload();
+      setShouldScrollToUpload(false);
+    });
+  }, [shouldScrollToUpload, session]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
@@ -89,11 +117,11 @@ export default function Home() {
                   </h1>
 
                   <p className="text-lg md:text-xl text-zinc-500 max-w-xl mx-auto mb-12">
-                    Upload your video to intelligently extract, select, and export
+                    Choose a video file to intelligently extract, select, and export
                     high-quality frames in seconds.
                   </p>
 
-                  {/* Upload box */}
+                  {/* File picker */}
                   <div className="bg-white rounded-3xl shadow-xl shadow-black/5 ring-1 ring-zinc-200 p-2">
                     <VideoUploader
                       onUploadSuccess={setSession}
@@ -119,30 +147,36 @@ export default function Home() {
             >
               {/* Back / breadcrumb */}
               <button
-                onClick={() => {
-                  setSession(null);
-                  setLocalFile(null);
-                  setHasExtracted(false);
-                  setExtractionVersion(0);
-                }}
+                onClick={handleNewUpload}
                 className="text-sm text-zinc-400 hover:text-zinc-700 transition-colors flex items-center gap-1"
               >
-                ← Upload a different video
+                ← Back to home page
               </button>
 
               {/* Video player + extraction config */}
               <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
                 <div className="lg:col-span-7 xl:col-span-8 bg-card rounded-2xl border shadow-sm overflow-hidden flex flex-col">
                   {localFile && (
-                    <VideoPreview file={localFile} session={session} />
+                    <VideoPreview file={localFile} session={session} onTimeUpdate={setPlayheadTime} />
                   )}
                 </div>
                 <div className="lg:col-span-5 xl:col-span-4">
                   <ExtractionPanel
                     session={session}
-                    onExtracted={() => {
+                    playheadTime={playheadTime}
+                    onExtracted={(frames) => {
+                      // Revoke old frame URLs before replacing them
+                      setExtractedFrames((prev) => {
+                        prev.forEach((f) => revokeIfBlobUrl(f.url));
+                        return frames;
+                      });
                       setHasExtracted(true);
                       setExtractionVersion((v) => v + 1);
+                    }}
+                    onFrameExtracted={(frame) => {
+                      // Progressive: append each frame as it's captured
+                      setExtractedFrames((prev) => [...prev, frame]);
+                      setHasExtracted(true);
                     }}
                   />
                 </div>
@@ -151,9 +185,15 @@ export default function Home() {
               {/* Frame gallery */}
               <section className="pt-8 border-t border-zinc-100">
                 <FrameGallery
-                  session={session}
+                  sessionId={session.sessionId}
+                  frames={extractedFrames}
                   hasExtracted={hasExtracted}
                   extractionVersion={extractionVersion}
+                  onDeleteFrames={(ids) => {
+                    setExtractedFrames((prev) =>
+                      prev.filter((f) => !ids.includes(f.id)),
+                    );
+                  }}
                 />
               </section>
 

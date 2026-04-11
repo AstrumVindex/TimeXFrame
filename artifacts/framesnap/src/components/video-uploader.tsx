@@ -2,133 +2,87 @@ import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadCloud, FileVideo, Loader2 } from "lucide-react";
-import type { UploadResponse } from "@workspace/api-client-react";
-import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { useIsMobile } from "@/hooks/use-mobile";
+import type { LocalSession } from "@/lib/types";
 
 interface VideoUploaderProps {
-  onUploadSuccess: (session: UploadResponse) => void;
+  onUploadSuccess: (session: LocalSession) => void;
   onFileSelect: (file: File) => void;
 }
 
-const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
-const CHUNK_SIZE_BYTES = 4 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
 
-async function readUploadError(response: Response): Promise<string> {
-  if (response.status === 413) {
-    return "This video is too large for the current web upload limit. Please try a smaller file.";
-  }
+/**
+ * Read video metadata locally using a hidden <video> element.
+ * No server upload required.
+ */
+function readLocalMetadata(file: File): Promise<LocalSession> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.muted = true;
+    const url = URL.createObjectURL(file);
+    video.src = url;
 
-  const contentType = response.headers.get("content-type") ?? "";
+    video.addEventListener("loadedmetadata", () => {
+      const session: LocalSession = {
+        sessionId: crypto.randomUUID(),
+        filename: file.name,
+        size: file.size,
+        duration: video.duration,
+        width: video.videoWidth,
+        height: video.videoHeight,
+        sourceFile: file,
+        objectUrl: url,
+      };
+      // Don't revoke — objectUrl is used for preview
+      resolve(session);
+    }, { once: true });
 
-  try {
-    if (contentType.includes("application/json")) {
-      const data = (await response.json()) as { message?: string; error?: string };
-      return data.message ?? data.error ?? `Upload failed with HTTP ${response.status}.`;
-    }
-
-    const text = (await response.text())
-      .replace(/<[^>]*>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    return text ? `HTTP ${response.status}: ${text.slice(0, 200)}` : `Upload failed with HTTP ${response.status}.`;
-  } catch {
-    return `Upload failed with HTTP ${response.status}.`;
-  }
-}
-
-async function uploadVideoInChunks(
-  file: File,
-  onProgress: (value: number) => void,
-): Promise<UploadResponse> {
-  const uploadId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const totalChunks = Math.max(1, Math.ceil(file.size / CHUNK_SIZE_BYTES));
-
-  for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex += 1) {
-    const start = chunkIndex * CHUNK_SIZE_BYTES;
-    const end = Math.min(file.size, start + CHUNK_SIZE_BYTES);
-    const chunk = file.slice(start, end, file.type || "application/octet-stream");
-
-    const formData = new FormData();
-    formData.append("chunk", chunk, file.name);
-    formData.append("uploadId", uploadId);
-    formData.append("filename", file.name);
-    formData.append("chunkIndex", String(chunkIndex));
-    formData.append("totalChunks", String(totalChunks));
-
-    const chunkResponse = await fetch("/api/upload-chunk", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!chunkResponse.ok) {
-      throw new Error(await readUploadError(chunkResponse));
-    }
-
-    onProgress(Math.max(5, Math.round((end / file.size) * 95)));
-  }
-
-  const finalizeResponse = await fetch("/api/upload-complete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      uploadId,
-      filename: file.name,
-      totalChunks,
-    }),
+    video.addEventListener("error", () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read video metadata. The file may be corrupted or unsupported."));
+    }, { once: true });
   });
-
-  if (!finalizeResponse.ok) {
-    throw new Error(await readUploadError(finalizeResponse));
-  }
-
-  const data = (await finalizeResponse.json()) as UploadResponse;
-  onProgress(100);
-  return data;
 }
 
 export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderProps) {
-  const { toast } = useToast();
   const [progress, setProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
+    setErrorMessage(null);
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      toast({
-        title: "File too large",
-        description: "Please upload a video smaller than 100MB.",
-        variant: "destructive",
-      });
+      setErrorMessage("Please select a video smaller than 500MB.");
       return;
     }
 
     onFileSelect(file);
-    setProgress(0);
-    setIsUploading(true);
+    setProgress(20);
+    setIsLoading(true);
 
     try {
-      const data = await uploadVideoInChunks(file, setProgress);
-      onUploadSuccess(data);
+      setProgress(50);
+      const session = await readLocalMetadata(file);
+      setProgress(100);
+      onUploadSuccess(session);
     } catch (error: unknown) {
       setProgress(0);
-      toast({
-        title: "Upload failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "There was an error uploading your video. Please try again.",
-        variant: "destructive",
-      });
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Could not read this video. Please try again.";
+      setErrorMessage(message);
     } finally {
-      setIsUploading(false);
+      setIsLoading(false);
     }
-  }, [onFileSelect, onUploadSuccess, toast]);
+  }, [onFileSelect, onUploadSuccess]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -138,26 +92,34 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
       "video/webm": [".webm"],
     },
     maxFiles: 1,
-    disabled: isUploading,
+    disabled: isLoading,
   });
+
+  const actionText = isMobile
+    ? "Tap to select video"
+    : isDragActive
+    ? "Drop video to load"
+    : "Drag & drop your video or Browse";
 
   return (
     <div className="w-full">
       <div
         {...getRootProps()}
         className={`
-          relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 ease-out
-          ${isDragActive ? "border-primary bg-primary/5 scale-[1.02]" : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100/50"}
-          ${isUploading ? "pointer-events-none opacity-80" : "cursor-pointer"}
+          relative flex flex-col items-center justify-center p-10 transition-all
+          border-2 border-zinc-200 bg-white rounded-2xl
+          md:border-2 md:border-dashed md:border-slate-200 md:rounded-[2rem] md:bg-transparent md:p-16
+          ${isDragActive ? "border-primary bg-primary/5 md:border-primary md:bg-primary/5" : "border-zinc-200 bg-white md:border-zinc-200 md:bg-zinc-50 md:hover:border-zinc-300 md:hover:bg-zinc-100/50"}
+          ${isLoading ? "pointer-events-none opacity-80" : "cursor-pointer"}
         `}
       >
         <input {...getInputProps()} />
 
         <div className="px-6 py-16 flex flex-col items-center justify-center text-center">
           <AnimatePresence mode="wait">
-            {isUploading ? (
+            {isLoading ? (
               <motion.div
-                key="uploading"
+                key="loading"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -166,9 +128,9 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Uploading video...</h3>
+                <h3 className="text-xl font-semibold mb-2">Reading video…</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Please keep this tab open while we upload your file safely.
+                  Reading metadata locally — nothing leaves your device.
                 </p>
                 <Progress value={progress} className="h-2 w-full" />
               </motion.div>
@@ -188,20 +150,23 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 >
                   {isDragActive ? <UploadCloud className="w-8 h-8" /> : <FileVideo className="w-8 h-8" />}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">
-                  {isDragActive ? "Drop video to upload" : "Drag & drop your video"}
-                </h3>
+                <h3 className="text-xl font-semibold mb-2">{actionText}</h3>
                 <p className="text-sm text-muted-foreground max-w-[260px] mx-auto mb-6">
-                  Supports MP4, MOV, and WEBM formats up to 100MB.
+                  Supports MP4, MOV, and WEBM. Processed locally — no upload needed.
                 </p>
-                <div className="px-6 py-2.5 rounded-full bg-white border shadow-sm text-sm font-medium text-foreground hover:shadow-md transition-shadow">
-                  Browse Files
-                </div>
+                {!isMobile && (
+                  <div className="px-6 py-2.5 rounded-full bg-white border shadow-sm text-sm font-medium text-foreground hover:shadow-md transition-shadow">
+                    Browse Files
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
+      {errorMessage && (
+        <p className="mt-3 text-sm text-red-600">{errorMessage}</p>
+      )}
     </div>
   );
 }

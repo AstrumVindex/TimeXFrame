@@ -19,12 +19,18 @@ import {
   UPLOADS_DIR,
   FRAMES_DIR,
 } from "../services/ffmpeg.js";
+import {
+  createJob,
+  getJobStatus,
+  startBackgroundProcessing,
+} from "../services/job-queue.js";
 
 const router: IRouter = Router();
 
-// Max file size: 100MB
-const MAX_FILE_SIZE = 100 * 1024 * 1024;
-const MAX_CHUNK_SIZE = 6 * 1024 * 1024;
+// Max file size: 500MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024;
+// Allow 50MB per chunk
+const MAX_CHUNK_SIZE = 50 * 1024 * 1024;
 const CHUNK_UPLOADS_DIR = path.join(UPLOADS_DIR, ".chunks");
 
 // Allowed video MIME types
@@ -51,7 +57,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({
+const uploadSingle = multer({
   storage,
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (_req, file, cb) => {
@@ -67,8 +73,30 @@ const upload = multer({
   },
 });
 
+const chunkStorage = multer.diskStorage({
+  destination: async (req, _file, cb) => {
+    try {
+      await ensureDirectories();
+      // uploadId will be validated in the request handler
+      // For now, we'll use a temporary name and rename after validation
+      cb(null, CHUNK_UPLOADS_DIR);
+    } catch (err) {
+      cb(err as Error, "");
+    }
+  },
+  filename: (_req, file, cb) => {
+    const chunkIndex = _req.body?.chunkIndex;
+    const uploadId = _req.body?.uploadId;
+    const index = Number.parseInt(String(chunkIndex), 10);
+    const padded = Number.isInteger(index) && index >= 0 ? String(index).padStart(5, "0") : `chunk-${Date.now()}`;
+    // Include uploadId in filename to organize chunks
+    const filename = uploadId ? `${uploadId}-${padded}.part` : `${padded}.part`;
+    cb(null, filename);
+  },
+});
+
 const chunkUpload = multer({
-  storage: multer.memoryStorage(),
+  storage: chunkStorage,
   limits: { fileSize: MAX_CHUNK_SIZE },
 });
 
@@ -87,10 +115,19 @@ router.post(
         return;
       }
 
+      if (req.file.size > MAX_CHUNK_SIZE) {
+        res.status(413).json({
+          error: "Upload failed",
+          message: "Chunk size is too large. Please try a smaller file or chunking strategy.",
+        });
+        return;
+      }
+
       if (typeof uploadId !== "string" || !isSafeUploadId(uploadId)) {
+        req.log?.error({ uploadId, type: typeof uploadId, body: req.body }, "Invalid uploadId received");
         res.status(400).json({
           error: "Invalid uploadId",
-          message: "Upload session ID is missing or invalid.",
+          message: `Upload session ID is missing or invalid. Received: ${JSON.stringify({ uploadId, type: typeof uploadId })}`,
         });
         return;
       }
@@ -106,14 +143,20 @@ router.post(
         return;
       }
 
-      await ensureDirectories();
-      await fs.mkdir(CHUNK_UPLOADS_DIR, { recursive: true });
+      if (!req.file || typeof req.file.path !== "string") {
+        res.status(500).json({
+          error: "Upload failed",
+          message: "Chunk storage failed; file path not available.",
+        });
+        return;
+      }
 
+      // Move the chunk to the correct directory structure
       const chunkDir = path.join(CHUNK_UPLOADS_DIR, uploadId);
       await fs.mkdir(chunkDir, { recursive: true });
-
-      const chunkPath = path.join(chunkDir, `${index.toString().padStart(5, "0")}.part`);
-      await fs.writeFile(chunkPath, req.file.buffer);
+      
+      const finalChunkPath = path.join(chunkDir, `${String(index).padStart(5, "0")}.part`);
+      await fs.rename(req.file.path, finalChunkPath);
 
       res.status(200).json({ ok: true, chunkIndex: index, totalChunks: total });
     } catch (err) {
@@ -126,6 +169,54 @@ router.post(
     }
   },
 );
+
+router.get("/upload-status/:sessionId", async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    if (typeof sessionId !== "string" || !isSafeUploadId(sessionId)) {
+      res.status(400).json({
+        error: "Invalid sessionId",
+        message: "Session ID is missing or invalid.",
+      });
+      return;
+    }
+
+    const job = getJobStatus(sessionId);
+
+    if (!job) {
+      res.status(404).json({
+        error: "Not found",
+        message: "Job not found. Session may have expired.",
+      });
+      return;
+    }
+
+    // Only return metadata if job is completed
+    const response: Record<string, unknown> = {
+      sessionId: job.sessionId,
+      filename: job.filename,
+      status: job.status,
+      createdAt: job.createdAt,
+    };
+
+    if (job.status === "completed" && job.metadata) {
+      response.metadata = job.metadata;
+    }
+
+    if (job.status === "failed" && job.error) {
+      response.error = job.error;
+    }
+
+    res.json(response);
+  } catch (err) {
+    req.log?.error({ err }, "Status check error");
+    res.status(500).json({
+      error: "Internal error",
+      message: "Failed to check job status.",
+    });
+  }
+});
 
 router.post("/upload-complete", async (req: Request, res: Response) => {
   try {
@@ -207,9 +298,40 @@ router.post("/upload-complete", async (req: Request, res: Response) => {
 });
 
 // POST /upload - Upload a video file
+const uploadSingleStorage = multer.diskStorage({
+  destination: async (_req, _file, cb) => {
+    try {
+      await ensureDirectories();
+      cb(null, UPLOADS_DIR);
+    } catch (err) {
+      cb(err as Error, "");
+    }
+  },
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".mp4";
+    cb(null, `${randomUUID()}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage: uploadSingleStorage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (isAllowedVideoMimeType(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          `Unsupported format. Please upload MP4, MOV, or WEBM files.`,
+        ),
+      );
+    }
+  },
+});
+
 router.post(
   "/upload",
-  upload.single("video"),
+  uploadSingle.single("video"),
   async (req: Request, res: Response) => {
     try {
       if (!req.file) {
@@ -220,19 +342,29 @@ router.post(
         return;
       }
 
-      // Get video metadata using ffprobe
-      const metadata = await getVideoMetadata(req.file.path);
+      if (req.file.size > MAX_FILE_SIZE) {
+        res.status(413).json({
+          error: "Upload failed",
+          message: "This video is too large for the current web upload limit. Please try a smaller file.",
+        });
+        return;
+      }
 
-      // Generate a session ID (use the filename UUID as session ID)
+      // Generate a session ID
       const sessionId = path.basename(req.file.filename, path.extname(req.file.filename));
 
+      // Create job but DON'T wait for metadata extraction
+      createJob(sessionId, req.file.originalname, req.file.path);
+      
+      // Start background processing without waiting
+      startBackgroundProcessing(sessionId);
+
+      // Return immediately with sessionId
       res.json({
         sessionId,
         filename: req.file.originalname,
-        duration: metadata.duration,
-        width: metadata.width,
-        height: metadata.height,
         size: req.file.size,
+        message: "Upload received. Analyzing video in background...",
       });
     } catch (err) {
       req.log?.error({ err }, "Upload error");
@@ -333,8 +465,8 @@ router.post("/extract", async (req: Request, res: Response) => {
 
     } else if (mode === "framecount") {
       const n = parseInt(frameCount, 10);
-      if (isNaN(n) || n < 1 || n > 200) {
-        res.status(400).json({ error: "Invalid frameCount", message: "Frame count must be between 1 and 200." });
+      if (isNaN(n) || n < 1) {
+        res.status(400).json({ error: "Invalid frameCount", message: "Frame count must be at least 1." });
         return;
       }
       filenames = await extractFramesByCount(videoPath, sessionId, n, quality, format, effectiveStartTime, endTime);
@@ -441,7 +573,8 @@ router.get("/frames", async (req: Request, res: Response) => {
 // GET /frames/:sessionId/:filename - Serve individual frame images
 router.get("/frames/:sessionId/:filename", async (req: Request, res: Response) => {
   try {
-    const { sessionId, filename } = req.params;
+    const sessionId = String(req.params.sessionId);
+    const filename = String(req.params.filename);
 
     // Security: prevent path traversal
     if (
@@ -478,7 +611,8 @@ router.get("/frames/:sessionId/:filename", async (req: Request, res: Response) =
 // DELETE /frames/:sessionId/:frameId - Delete a specific frame
 router.delete("/frames/:sessionId/:frameId", async (req: Request, res: Response) => {
   try {
-    const { sessionId, frameId } = req.params;
+    const sessionId = String(req.params.sessionId);
+    const frameId = String(req.params.frameId);
 
     // Validate no path traversal
     if (sessionId.includes("..") || frameId.includes("..")) {
@@ -489,7 +623,10 @@ router.delete("/frames/:sessionId/:frameId", async (req: Request, res: Response)
     // frameId is in format "sessionId_idx" — resolve to filename
     const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
     const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
-    const sortedFiles = allFiles.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
+    const sortedFiles = allFiles
+      .map((f) => String(f))
+      .filter((f) => /\.(jpg|png|webp)$/.test(f))
+      .sort();
 
     const idxStr = frameId.replace(`${sessionId}_`, "");
     const idx = parseInt(idxStr, 10);
@@ -513,7 +650,7 @@ router.delete("/frames/:sessionId/:frameId", async (req: Request, res: Response)
 // DELETE /frames/:sessionId - Delete multiple frames (bulk)
 router.delete("/frames/:sessionId", async (req: Request, res: Response) => {
   try {
-    const { sessionId } = req.params;
+    const sessionId = String(req.params.sessionId);
     const { frameIds } = req.body as { frameIds: string[] };
 
     if (!frameIds || !Array.isArray(frameIds) || frameIds.length === 0) {
@@ -528,7 +665,10 @@ router.delete("/frames/:sessionId", async (req: Request, res: Response) => {
 
     const sessionFramesDir = path.join(FRAMES_DIR, sessionId);
     const allFiles = await fs.readdir(sessionFramesDir).catch(() => []);
-    const sortedFiles = allFiles.filter((f) => /\.(jpg|png|webp)$/.test(f)).sort();
+    const sortedFiles = allFiles
+      .map((f) => String(f))
+      .filter((f) => /\.(jpg|png|webp)$/.test(f))
+      .sort();
 
     let deletedCount = 0;
     for (const frameId of frameIds) {

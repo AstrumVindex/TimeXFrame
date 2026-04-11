@@ -1,7 +1,7 @@
 import { Header } from "@/components/layout-header";
 import { Footer } from "@/components/landing-sections";
 import { SeoHead } from "@/components/seo-head";
-import { ShieldCheck, Clock, UserX, Lock, HardDrive, Zap, ArrowUp } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { useState, useEffect } from "react";
 
 type LegalVariant = "privacy" | "terms" | "cookies";
@@ -9,35 +9,50 @@ type LegalVariant = "privacy" | "terms" | "cookies";
 const LEGAL_CONTENT: Record<LegalVariant, { eyebrow: string; title: string; subtitle?: string; intro: string; sections: Array<{ heading: string; body: string; icon?: string }> }> = {
   privacy: {
     eyebrow: "Privacy by Design",
-    title: "TimexFrame Privacy & Data Handling",
-    subtitle: "We believe your media belongs to you.",
+    title: "TimexFrame Privacy & Terms",
+    subtitle: "Your use of TimexFrame is governed by this agreement.",
     intro:
-      "TimexFrame is built to be a transient utility, meaning we process what you need and forget the rest. No tracking. No accounts. No long-term storage.",
+      "Welcome to TimexFrame. By accessing our website, you are entering into a legally binding agreement with TimexFrame. Please read the following terms carefully.",
     sections: [
       {
-        heading: "No Accounts, No Tracking",
-        body: "We do not require registration, email addresses, or any personal identification to use TimexFrame. We do not use tracking cookies to build profiles or serve targeted advertisements. Your visit is anonymous.",
-        icon: "UserX",
+        heading: "1. Agreement to Terms & Scope of Service",
+        body: "Welcome to TimexFrame. By accessing our website, located at [Your Domain], you are entering into a legally binding agreement with TimexFrame (\"we,\" \"us,\" or \"our\"). These Terms of Use govern your access to and use of our web-based video frame extraction utility. Whether you are a casual user, a student, a professional designer, or a YouTube creator, your use of this service is conditioned upon your acceptance of and compliance with these Terms.\n\nOur service is designed to provide a high-speed, no-registration interface for extracting high-quality still images from video files. By clicking \"Upload,\" \"Start Extraction,\" or otherwise interacting with the platform, you represent that you are at least 13 years of age (or the minimum age of digital consent in your jurisdiction) and that you have the legal capacity to enter into this agreement. If you are using the service on behalf of a company or organization, you represent that you have the authority to bind that entity to these terms.",
       },
       {
-        heading: "Ephemeral Media Processing",
-        body: "When you upload a video, it is stored in a secured, temporary directory on our server. Processing is strictly limited to frame extraction and preview generation. All uploaded videos and extracted frames are automatically and permanently deleted from our disks exactly 60 minutes after upload. No human at TimexFrame ever views your uploaded content.",
-        icon: "Clock",
+        heading: "2. Description of the 'Ephemeral' Service Model",
+        body: "TimexFrame operates on a \"Privacy-First, Local-Processing\" model. It is important for users to understand the technical nature of how our service functions: \n\nNon-Account Based: We do not provide user accounts. Your session is identified locally in your browser via a UUID. This means we do not store your name, email, or identity.\n\nProcessing vs. Storage: TimexFrame is a processing utility, not a storage provider. Core frame extraction runs in your browser using local device resources.\n\nData Lifecycle: Source video files remain on your device during extraction. Generated frame files remain in your browser session until you download or close/clear the session.",
       },
       {
-        heading: "Data Security",
-        body: "While your media is on our servers, it is protected by industry-standard encryption. However, because TimexFrame is a public utility, we advise against uploading highly sensitive, confidential, or illegal material.",
-        icon: "Lock",
+        heading: "3. Intellectual Property: Yours & Ours",
+        body: "Your Media: You remain the sole owner of any video you process with TimexFrame. We do not claim any ownership, copyright, or intellectual property rights over your original files or the frames extracted from them.\n\nOur Platform: All aspects of the TimexFrame platform, including the brand name, logo, \"Extract perfection from motion\" slogan, UI components (based on shadcn/ui), custom TypeScript logic, and analysis logic, are the intellectual property of TimexFrame. You may not scrape, crawl, or frame the website for commercial purposes without our express written consent.",
       },
       {
-        heading: "Local Storage",
-        body: "We use a unique session ID (UUID) stored in your browser's local storage to ensure that only you can see the frames you've extracted during your current session. This ID is not linked to your identity.",
-        icon: "HardDrive",
+        heading: "4. Acceptable Use & Prohibited Conduct",
+        body: "To ensure the service remains fast and free for everyone, you agree to use TimexFrame only for lawful purposes. Prohibited conduct includes, but is not limited to: \n\nInfrastructure Abuse: You may not attempt to overload or abuse the service with automated scripts or malformed requests.\n\nIllegal Content: You are strictly prohibited from processing media that contains child sexual abuse material (CSAM), promotes terrorism, or depicts illegal acts of violence. We have a zero-tolerance policy for such content and will cooperate with law enforcement when legally required.\n\nHarassment & Rights Violation: You may not use this tool to extract frames from media that you do not have the rights to, or to create deepfakes or other content intended to harass or defame individuals.\n\nSecurity Interference: You may not attempt to gain unauthorized access to application infrastructure, other users' sessions, or protected resources.",
       },
       {
-        heading: "Third-Party Services",
-        body: "TimexFrame does not sell or share your media with third parties. We use standard server infrastructure to host our backend, and all processing (FFmpeg/Sharp) happens within our own controlled environment. We may use third-party service providers, such as Google AdSense, to serve advertisements. These providers may use cookies to serve ads based on your visit to this and other websites. You may opt out of personalized advertising by visiting Google's Ads Settings.",
-        icon: "ShieldCheck",
+        heading: "5. Technical Disclaimers (FFmpeg & Sharp)",
+        body: "TimexFrame relies on open-source and browser-provided decoding capabilities for frame extraction and image generation.\n\nExtraction Accuracy: While we strive for millisecond precision, frame extraction can vary based on video encoding and browser decoding behavior. We do not guarantee that the extracted frame will perfectly match previews across every browser and device.\n\nQuality Variations: The Smart Suggestions feature uses algorithmic scoring (such as sharpness and brightness heuristics). This is a mathematical approximation. We are not liable if the algorithm selects a frame that does not meet your subjective artistic standards.\n\nCodec Support: While we support MP4, MOV, and WEBM, we cannot guarantee support for every proprietary or legacy codec.",
+      },
+      {
+        heading: "6. Limitation of Liability",
+        body: "In no event shall TimexFrame, its developers, or affiliates be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from: \n\n- Your access to or use of (or inability to access or use) the service.\n- Any conduct or content of any third party on the service.\n- Any content obtained from the service.\n- Unauthorized access, use, or alteration of your transmissions or content.\n\nAs a free utility, TimexFrame is provided AS IS and AS AVAILABLE without warranties of any kind, whether express or implied. We do not warrant that the service will be uninterrupted, secure, or free of bugs or viruses.",
+      },
+      {
+        heading: "7. Third-Party Links & Advertising",
+        body: "TimexFrame may contain links to third-party websites or services that are not owned or controlled by us. We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party websites. Furthermore, we may display advertisements via the Google AdSense network. These advertisers may use cookies to track your visits to this and other sites to provide personalized ads. Your interactions with these advertisers are governed by their respective terms and policies.",
+      },
+      {
+        heading: "8. Indemnification",
+        body: "You agree to defend, indemnify, and hold harmless TimexFrame and its operators from and against any and all claims, damages, obligations, losses, liabilities, costs or debt, and expenses (including but not limited to attorney's fees), resulting from or arising out of: \n\n- Your use and access of the Service;\n- A breach of these Terms;\n- Any infringement by you (or any third party using your session) of any intellectual property or other right of any person or entity.",
+      },
+      {
+        heading: "9. Service Modifications & Termination",
+        body: "We reserve the right to modify, suspend, or discontinue any part of TimexFrame at any time without notice. We may update these Terms of Use to reflect changes in our technology or legal requirements. The Last Updated date at the top of the page will indicate when the most recent changes were made. Since we do not have your email, it is your responsibility to check this page for updates. We reserve the right to block specific IP addresses that violate our Acceptable Use Policy.",
+      },
+      {
+        heading: "10. Governing Law & Jurisdiction",
+        body: "These Terms shall be governed and construed in accordance with the laws of [Your Country/State], without regard to its conflict of law provisions. Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights. If any provision of these Terms is held to be invalid or unenforceable by a court, the remaining provisions of these Terms will remain in effect. These Terms constitute the entire agreement between us regarding our Service and supersede any prior agreements we might have had.",
       },
     ],
   },
@@ -49,23 +64,23 @@ const LEGAL_CONTENT: Record<LegalVariant, { eyebrow: string; title: string; subt
     sections: [
       {
         heading: "Introduction and Agreement to Terms",
-        body: "This document governs your relationship with TimexFrame. By accessing or using our video frame extraction services, you agree to be bound by these Terms of Use. If you disagree with any part of these terms, you must immediately discontinue use of the website. TimexFrame provides a browser-based interface for processing video files via our proprietary backend logic. These terms apply to all visitors, users, and others who wish to access or use the Service. Your agreement with us includes these Terms and our Privacy Policy. We reserve the right to update these terms at any time. Changes will be effective immediately upon posting to this page, noted by the 'Last Updated' date. It is your responsibility to review these terms periodically. Continued use after changes constitutes acceptance.",
+        body: "This document governs your relationship with TimexFrame. By accessing or using our video frame extraction services, you agree to be bound by these Terms of Use. If you disagree with any part of these terms, you must immediately discontinue use of the website. TimexFrame provides a browser-based interface for processing video files primarily in your local browser session. These terms apply to all visitors, users, and others who wish to access or use the Service. Your agreement with us includes these Terms and our Privacy Policy. We reserve the right to update these terms at any time. Changes will be effective immediately upon posting to this page, noted by the 'Last Updated' date. It is your responsibility to review these terms periodically. Continued use after changes constitutes acceptance.",
       },
       {
         heading: "Nature of the Service",
-        body: "TimexFrame is an ephemeral utility tool. It is designed to allow users to upload video files (MP4, MOV, WEBM) for the purpose of extracting individual still images (frames). No Persistence: We do not provide video hosting, cloud storage, or long-term asset management. The 'As-Is' Clause: The service is provided 'as-is' and 'as available.' We do not guarantee that the frame extraction will be frame-accurate for every single proprietary codec or that the service will be available 100% of the time. Technical Constraints: Users acknowledge that processing happens on our servers using FFmpeg and Sharp. These processes are resource-intensive. We reserve the right to limit file sizes (currently 100MB), resolution, or the number of extractions per session to ensure server stability for all users.",
+        body: "TimexFrame is an ephemeral utility tool. It is designed to allow users to select video files (MP4, MOV, WEBM) for extracting individual still images (frames). No Persistence: We do not provide video hosting, cloud storage, or long-term asset management. The 'As-Is' Clause: The service is provided 'as-is' and 'as available.' We do not guarantee that frame extraction will be perfectly frame-accurate for every proprietary codec or that the service will be available 100% of the time. Technical Constraints: Users acknowledge that processing is device-dependent and browser-dependent, and performance may vary across hardware.",
       },
       {
         heading: "Intellectual Property Rights",
-        body: "Your Content: You retain all ownership rights to the videos you upload. TimexFrame does not claim any license or copyright over your original media or the frames extracted from it. However, by uploading, you grant us a temporary, technical license to process the file on our hardware solely to fulfill your request. Our Content: The TimexFrame name, logo, UI design, custom code (React/TypeScript), and branding are the exclusive property of TimexFrame. You may not clone, 'scrape,' or reverse-engineer our backend API or frontend logic without express written consent. Copyright Compliance: You represent and warrant that you own or have the necessary licenses to process the content you upload. TimexFrame is not responsible for copyright infringement committed by users.",
+        body: "Your Content: You retain all ownership rights to the videos you process. TimexFrame does not claim any license or copyright over your original media or the frames extracted from it. Our Content: The TimexFrame name, logo, UI design, custom code (React/TypeScript), and branding are the exclusive property of TimexFrame. You may not clone, 'scrape,' or reverse-engineer protected service logic without express written consent. Copyright Compliance: You represent and warrant that you own or have the necessary licenses to process the content you use. TimexFrame is not responsible for copyright infringement committed by users.",
       },
       {
         heading: "Acceptable Use Policy (AUP)",
-        body: "To maintain a safe and efficient environment, you agree not to: System Abuse: Attempt to bypass the 100MB limit, or use automated scripts (bots) to spam our Fastify API. Illegal Material: Upload content that is unlawful, harmful, threatening, abusive, or contains child-safety violations. Reverse Engineering: Attempt to extract the source code of our Sharp-based image analysis or FFmpeg configurations. Malware: Upload files containing viruses, corrupted data, or malicious code designed to exploit our Node.js environment. Commercial Resale: You may not 're-package' TimexFrame as a paid service of your own by proxying our API.",
+        body: "To maintain a safe and efficient environment, you agree not to: System Abuse: Attempt to bypass usage limits, or use automated scripts (bots) to spam the service. Illegal Material: Process content that is unlawful, harmful, threatening, abusive, or contains child-safety violations. Reverse Engineering: Attempt to extract protected service code or proprietary analysis configurations. Malware: Use files containing viruses, corrupted data, or malicious code designed to exploit application environments. Commercial Resale: You may not 're-package' TimexFrame as a paid service of your own by proxying our service.",
       },
       {
         heading: "Limitation of Liability",
-        body: "To the maximum extent permitted by law, TimexFrame and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages. This includes, but is not limited to: Loss of data (since we delete files after 60 minutes, we are not responsible for files you forgot to download). Server downtime or extraction errors. Any bugs, viruses, or trojan horses that may be transmitted through our service by third parties (though we maintain strict security protocols). The quality of the output frames. Sharpness and brightness scoring are algorithmic and may not always meet professional artistic standards.",
+        body: "To the maximum extent permitted by law, TimexFrame and its operators shall not be liable for any indirect, incidental, special, consequential, or punitive damages. This includes, but is not limited to: Loss of data in your local browser session if you close, clear, or reset it before saving results; service interruptions or extraction errors; any bugs, viruses, or trojan horses that may be transmitted through our service by third parties (though we maintain strict security protocols); and the quality of output frames. Smart scoring is algorithmic and may not always meet professional artistic standards.",
       },
       {
         heading: "User-Generated Content Disclaimer",
@@ -73,7 +88,7 @@ const LEGAL_CONTENT: Record<LegalVariant, { eyebrow: string; title: string; subt
       },
       {
         heading: "Data Retention and Automatic Deletion",
-        body: "As stated in our Privacy Policy, TimexFrame operates on an ephemeral basis. The 60-Minute Rule: All temporary files (uploads and extracted JPG/PNG/WebP files) are scheduled for a 'Hard Delete' from our server storage exactly one hour after the upload timestamp. No Recovery: Once data is deleted, it is unrecoverable. We do not keep backups of user-processed media. Users are encouraged to download their ZIP files immediately upon extraction. We are not a storage provider.",
+        body: "As stated in our Privacy Policy, TimexFrame operates on an ephemeral basis. Source videos are processed locally in your browser and are not stored by us as part of standard extraction. Generated results remain available in your active browser session until you clear session data, navigate away, or close the session context. We are not a storage provider.",
       },
       {
         heading: "Termination of Access",
@@ -86,14 +101,38 @@ const LEGAL_CONTENT: Record<LegalVariant, { eyebrow: string; title: string; subt
     ],
   },
   cookies: {
-    eyebrow: "Cookie Policy",
-    title: "What browser storage TimexFrame uses.",
+    eyebrow: "Cookie & Browser Storage Policy",
+    title: "Cookie & Browser Storage Policy",
     intro:
-      "TimexFrame keeps browser-side state only as needed.",
+      "Effective Date: April 2, 2026. This document explains how TimexFrame uses browser-side storage to deliver a functional and secure frame extraction service.",
     sections: [
       {
-        heading: "Essential storage",
-        body: "The app may use temporary browser storage.",
+        heading: "1. Scope of Policy",
+        body: "This policy describes how TimexFrame uses browser-side storage to provide its video frame extraction services. We do not use traditional HTTP cookies for tracking or advertising. Instead, we utilize browser Local Storage to maintain functional sessions.",
+      },
+      {
+        heading: "2. Essential Technical Storage",
+        body: "TimexFrame uses a single piece of browser-side data to operate:\n\nIdentifier: session_uuid\nTechnology: Web Storage API (Local Storage)\nNature: Strictly Necessary / Functional\nDescription: A randomly generated Universally Unique Identifier (UUID) assigned to your browser session when you start processing.",
+      },
+      {
+        heading: "3. Purpose of Storage",
+        body: "The session_uuid is used exclusively for the following technical purposes:\n\n- Session Continuity: To keep extraction and gallery state consistent during your active browser session.\n- Security: To maintain session isolation for temporary in-browser results.\n- Access Control: To reduce unauthorized access to session-scoped processing flows.",
+      },
+      {
+        heading: "4. Anonymity and Data Linking",
+        body: "No PII: The UUID is an anonymous string of characters. It is not linked to your name, email address, IP address, or any other Personally Identifiable Information (PII).\n\nNo Cross-Site Tracking: This identifier is restricted to the timexframe.com domain. It cannot be used to track your activity on other websites.",
+      },
+      {
+        heading: "5. Data Retention and Deletion",
+        body: "TimexFrame operates on an ephemeral infrastructure:\n\nClient-Side Media: Source media and extracted images are processed and retained within your browser session context.\n\nClient-Side Identifier: The session_uuid remains in your browser's Local Storage. You may manually clear this data at any time via your browser settings, though doing so may terminate your ability to access current extraction results.",
+      },
+      {
+        heading: "6. Third-Party Cookies",
+        body: "Zero Third-Party Tracking: TimexFrame does not deploy third-party cookies.\n\nNo Advertising: We do not use advertising networks, retargeting pixels, or social media tracking scripts.\n\nNo Analytics: We do not use third-party analytics platforms that require persistent user-tracking cookies.",
+      },
+      {
+        heading: "7. Compliance and User Control",
+        body: "By using TimexFrame, you acknowledge the use of the essential Local Storage described above. If you wish to opt out, you must disable Local Storage in your browser settings; however, the Service will be unable to process or return video frames without this functional identifier.",
       },
     ],
   },
@@ -119,22 +158,7 @@ export default function LegalPage({ variant }: { variant: LegalVariant }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const getIcon = (iconName?: string) => {
-    switch (iconName) {
-      case "UserX":
-        return <UserX className="w-6 h-6" />;
-      case "Clock":
-        return <Clock className="w-6 h-6" />;
-      case "Lock":
-        return <Lock className="w-6 h-6" />;
-      case "HardDrive":
-        return <HardDrive className="w-6 h-6" />;
-      case "ShieldCheck":
-        return <ShieldCheck className="w-6 h-6" />;
-      default:
-        return null;
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
@@ -147,19 +171,8 @@ export default function LegalPage({ variant }: { variant: LegalVariant }) {
       <Header />
 
       <main className="bg-white">
-        {isPrivacy && (
-          <div className="bg-gradient-to-b from-zinc-50 to-white border-b border-zinc-200">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 mb-6">
-                <Zap className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">Server Status: All temporary data older than 60m has been purged</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <section className={isPrivacy ? "bg-gradient-to-b from-zinc-50 to-white border-b border-zinc-100" : "border-b border-zinc-100"}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+        <section className="border-b border-zinc-100">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">{content.eyebrow}</p>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-3">
               {content.title}
@@ -170,37 +183,14 @@ export default function LegalPage({ variant }: { variant: LegalVariant }) {
           </div>
         </section>
 
-        <section className={isPrivacy ? "py-20" : "py-16 bg-zinc-50"}>
-          <div className={isPrivacy ? "max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" : "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"}>
-            {isPrivacy ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {content.sections.map((section, i) => (
-                  <div
-                    key={section.heading}
-                    className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-zinc-300 transition-all"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-lg bg-blue-50 p-3 text-blue-600 flex-shrink-0">
-                        {getIcon(section.icon)}
-                      </div>
-                      <div className="flex-1">
-                        <h2 className="text-lg font-semibold text-zinc-900 mb-2">{section.heading}</h2>
-                        <p className="text-sm text-zinc-600 leading-relaxed">{section.body}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {content.sections.map((section) => (
-                  <article key={section.heading} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-                    <h2 className="text-lg font-semibold text-zinc-900 mb-2">{section.heading}</h2>
-                    <p className="text-sm text-zinc-500 leading-relaxed">{section.body}</p>
-                  </article>
-                ))}
-              </div>
-            )}
+        <section className="py-16">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            {content.sections.map((section) => (
+              <article key={section.heading} className="space-y-3">
+                <h2 className="text-xl font-semibold text-zinc-900">{section.heading}</h2>
+                <p className="text-base text-zinc-700 leading-relaxed">{section.body}</p>
+              </article>
+            ))}
           </div>
         </section>
       </main>

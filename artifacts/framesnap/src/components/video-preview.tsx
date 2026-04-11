@@ -1,11 +1,12 @@
 import { useMemo, useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Clock, HardDrive, Maximize } from "lucide-react";
-import type { UploadResponse } from "@workspace/api-client-react";
+import type { LocalSession } from "@/lib/types";
 
 interface VideoPreviewProps {
   file: File;
-  session: UploadResponse;
+  session: LocalSession;
+  onTimeUpdate?: (currentTime: number) => void;
 }
 
 function formatBytes(bytes: number) {
@@ -22,23 +23,30 @@ function formatDuration(seconds: number) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function VideoPreview({ file, session }: VideoPreviewProps) {
+export function VideoPreview({ file, session, onTimeUpdate }: VideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const url = useMemo(() => URL.createObjectURL(file), [file]);
+  // Reuse the session's objectUrl if available; otherwise create one from the file
+  const ownUrl = useMemo(() => session.objectUrl ?? URL.createObjectURL(file), [file, session.objectUrl]);
   
   useEffect(() => {
-    return () => URL.revokeObjectURL(url);
-  }, [url]);
+    // Only revoke if we created our own URL (not the session's shared one)
+    if (!session.objectUrl) {
+      return () => URL.revokeObjectURL(ownUrl);
+    }
+    return undefined;
+  }, [ownUrl, session.objectUrl]);
 
   return (
     <div className="flex flex-col h-full bg-zinc-50/50">
       <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden shadow-inner group">
         <video 
           ref={videoRef}
-          src={url} 
+          src={ownUrl} 
           controls 
           controlsList="nodownload"
           className="w-full h-full object-contain"
+          onTimeUpdate={(e) => onTimeUpdate?.((e.target as HTMLVideoElement).currentTime)}
+          onSeeked={(e) => onTimeUpdate?.((e.target as HTMLVideoElement).currentTime)}
         />
       </div>
       

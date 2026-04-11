@@ -47,7 +47,7 @@ export const BLOG_POSTS: BlogPost[] = [
     updatedAt: "2026-03-31",
     readTime: "4 min read",
     summary: [
-      "Upload the original source file when possible for the sharpest results.",
+      "Use the original source file when possible for the sharpest results.",
       "Use count, interval, or timestamp mode based on how precise you need the stills to be.",
       "Compare outputs quickly and keep only the frames that best fit your use case.",
     ],
@@ -55,7 +55,7 @@ export const BLOG_POSTS: BlogPost[] = [
       {
         heading: "Start with the original video",
         body:
-          "For the best results, upload the original MP4, MOV, or WEBM file instead of a re-compressed copy. TimexFrame keeps the source resolution so each extracted frame stays sharp.",
+          "For the best results, choose the original MP4, MOV, or WEBM file instead of a re-compressed copy. TimexFrame keeps the source resolution so each extracted frame stays sharp.",
       },
       {
         heading: "Choose the right extraction mode",

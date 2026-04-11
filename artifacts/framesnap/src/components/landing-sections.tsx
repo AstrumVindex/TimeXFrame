@@ -29,7 +29,7 @@ const FEATURES = [
   {
     icon: Zap,
     title: "Fast Processing",
-    desc: "Powered by FFmpeg on the server side, frames are extracted in seconds regardless of video length.",
+    desc: "Powered by in-browser extraction, frames are processed locally in seconds without uploading your file.",
   },
   {
     icon: PackageOpen,
@@ -44,7 +44,7 @@ const FEATURES = [
   {
     icon: FileVideo,
     title: "Multiple Formats",
-    desc: "Upload MP4, MOV, or WEBM — the most common video formats are all supported out of the box.",
+    desc: "Use MP4, MOV, or WEBM files directly from your device — common formats are supported out of the box.",
   },
   {
     icon: SlidersHorizontal,
@@ -92,8 +92,8 @@ const STEPS = [
   {
     icon: Upload,
     step: "01",
-    title: "Upload Your Video",
-    desc: "Drag and drop or click to upload any MP4, MOV, or WEBM video up to 100 MB.",
+    title: "Select Your Video",
+    desc: "Drag and drop or click to choose any MP4, MOV, or WEBM video from your device.",
   },
   {
     icon: SlidersHorizontal,
@@ -119,7 +119,7 @@ export function HowItWorksSection() {
             How to Extract Frames in 3 Steps
           </h2>
           <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
-            No sign-up, no software — just upload and go.
+            No sign-up, no software — just pick a file and go.
           </p>
         </div>
 
@@ -210,7 +210,7 @@ export function UseCasesSection() {
 const FAQS = [
   {
     q: "How do I extract frames from a video?",
-    a: "Upload your video, choose either a specific timestamp (hh:mm:ss) or an interval (every X seconds), then click Extract Frames. Your frames appear instantly in the gallery.",
+    a: "Select your video file, choose either a specific timestamp (hh:mm:ss) or an interval (every X seconds), then click Extract Frames. Your frames appear instantly in the gallery.",
   },
   {
     q: "Is this tool free?",
@@ -218,7 +218,7 @@ const FAQS = [
   },
   {
     q: "What video formats are supported?",
-    a: "MP4, MOV, and WEBM formats are supported. Files up to 100 MB can be uploaded.",
+    a: "MP4, MOV, and WEBM formats are supported. Files are processed locally in your browser.",
   },
   {
     q: "Does frame extraction reduce image quality?",
@@ -226,7 +226,7 @@ const FAQS = [
   },
   {
     q: "Is my video safe and private?",
-    a: "Your video is processed securely on the server and automatically deleted within one hour. Nothing is stored permanently.",
+    a: "Your video stays on your device during extraction. Frames are generated locally in your browser and are not uploaded.",
   },
   {
     q: "What are Smart Suggestions?",
