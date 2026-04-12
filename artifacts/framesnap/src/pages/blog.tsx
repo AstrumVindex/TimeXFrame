@@ -1,9 +1,12 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { ArrowRight, BookOpen, CalendarDays, Clock3, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, Clock3 } from "lucide-react";
+import { motion, useScroll } from "framer-motion";
 import { Header } from "@/components/layout-header";
 import { Footer } from "@/components/landing-sections";
 import { Button } from "@/components/ui/button";
 import { SeoHead } from "@/components/seo-head";
+import { BlogLayout } from "@/components/blog-layout";
 
 type BlogPost = {
   slug: string;
@@ -27,6 +30,118 @@ type BlogPost = {
 const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://timexframe.app";
 
 export const BLOG_POSTS: BlogPost[] = [
+  {
+    slug: "mastering-the-frame-high-resolution-extraction",
+    category: "Deep Dive",
+    title: "Mastering the Frame: The Technical Art of High-Resolution Extraction",
+    excerpt:
+      "Why simple screenshots fail and how professional-grade client-side processing preserves the soul of your 4K footage.",
+    seoTitle: "Mastering the Frame: The Technical Art of High-Resolution Extraction",
+    seoDescription:
+      "Why simple screenshots fail and how professional-grade client-side processing preserves the soul of your 4K footage.",
+    keywords: [
+      "high resolution frame extraction",
+      "inter-frame compression",
+      "client-side frame extraction",
+      "laplacian variance sharpness",
+      "video gamma shift",
+      "webp extraction workflow",
+    ],
+    dateLabel: "April 12, 2026",
+    publishedAt: "2026-04-12",
+    updatedAt: "2026-04-12",
+    readTime: "9 min read",
+    summary: [
+      "Screenshots fail because players render reconstructed, smoothed frames instead of preserving source-level fidelity.",
+      "TimexFrame uses client-side GOP-aware decoding and sharpness analysis to find cleaner stills faster.",
+      "Color accuracy, output format strategy, and local-first privacy controls are core to pro extraction workflows.",
+    ],
+    sections: [
+      {
+        heading: "The Illusion of the Pause Button",
+        body:
+          "To the casual observer, a video is simply a fast-moving sequence of photos. It stands to reason, then, that pausing a video and taking a screenshot should yield a perfect photograph. However, anyone who has tried to capture a crisp still from a 4K action shot knows this is rarely the case.\n\nWhen you pause a video in a standard web browser, you aren't looking at a raw image. You are looking at a reconstructed frame rendered by your GPU, often at a lower bitrate than the source file, and frequently subject to smoothing algorithms that blur fine details. To truly extract perfection from motion, we have to go deeper into the architecture of video compression itself.",
+      },
+      {
+        heading: "1. Understanding Inter-frame Compression",
+        body:
+          "Modern video formats like MP4 (H.264/H.265) and WEBM don't store every frame as a full picture. If they did, a 4K movie would take up terabytes of space. Instead, they use temporal compression.\n\nVideo files are made up of a Group of Pictures (GOP), consisting of three types of frames:\n\nI-Frames (Intra-coded): complete images that act as anchors.\nP-Frames (Predicted): store only changes from previous frames.\nB-Frames (Bi-directional): use both forward and backward references.\n\nWhen you use TimexFrame, the browser pipeline does more than take a screenshot. It decodes and reconstructs frame data with GOP context so that even B-frame moments are rendered with high fidelity from surrounding reference frames.",
+      },
+      {
+        heading: "2. The Battle Against Motion Blur",
+        body:
+          "One of the biggest hurdles in frame extraction is the shutter speed of the original footage. Even in 4K, if a subject is moving faster than exposure can freeze, you get blur.\n\nThis is where Smart Mode changes the game. Instead of manually scrubbing through 60 frames per second, TimexFrame uses Sharp with Laplacian variance analysis to score edge clarity.\n\nBlurry frames tend to have soft, gradual transitions between pixels. Sharp frames show high-contrast edge transitions. By assigning a mathematical sharpness score to each frame, the system can surface peak-clarity moments in seconds, saving editors and creators hours of manual selection.",
+      },
+      {
+        heading: "3. Color Science and Gamma Shifts",
+        body:
+          "Professional colorists often notice gamma shifts when converting video into stills. Browsers may interpret video and image color spaces differently, such as Rec.709 versus sRGB, causing washed-out or overly dark exports.\n\nTimexFrame now handles extraction directly in the browser and keeps the pipeline color-aware while exporting. A PNG output is not merely a screenshot; it is a color-conscious representation of your original footage.",
+      },
+      {
+        heading: "4. Why No-Login Matters for Creators",
+        body:
+          "In modern creative workflows, speed is a feature. Many pro tools require subscriptions and account setup before you can even start.\n\nTimexFrame is built on an account-free, local-first model. Files are processed on your device so you can move from upload to export without account friction or remote media storage.",
+      },
+      {
+        heading: "5. Optimizing for the Modern Web: WebP and Beyond",
+        body:
+          "PNG remains the gold standard for lossless quality, but file size can be heavy. For many users, especially bloggers, UI designers, and social teams, WebP is often the practical winner.\n\nWebP can approach JPG-like size while preserving stronger edge quality and optional transparency. TimexFrame supports direct WebP output so you can produce high-resolution stills that remain fast to load on modern mobile and web surfaces.",
+      },
+    ],
+  },
+  {
+    slug: "4k-video-stills-guide",
+    category: "Tutorial",
+    title: "4K Video Stills: A Complete Guide to Extracting Crisp Frames",
+    excerpt:
+      "Going from a 4K timeline to pixel-perfect stills is deceptively nuanced. This guide walks through every setting—resolution, codec, and colour science—that separates a sharp extracted frame from a soft, banded disappointment.",
+    seoTitle: "4K Video Stills: A Complete Guide to Extracting Crisp Frames",
+    seoDescription:
+      "Going from a 4K timeline to pixel-perfect stills is deceptively nuanced. This guide walks through every setting—resolution, codec, and colour science—that separates a sharp extracted frame from a soft, banded disappointment.",
+    keywords: [
+      "4K video frame extraction",
+      "extract frames from 4K video",
+      "high resolution video stills",
+      "video frame to image",
+      "client-side video extraction",
+    ],
+    dateLabel: "April 5, 2026",
+    publishedAt: "2026-04-05",
+    updatedAt: "2026-04-05",
+    readTime: "6 min read",
+    summary: [
+      "Use precise extraction modes, not generic screenshots, to capture the exact frame you need.",
+      "Choose output formats intentionally: PNG for maximum detail, JPG for sharing, WEBP for balanced quality and size.",
+      "TimexFrame processes frames locally in your browser for stronger privacy and immediate control.",
+    ],
+    sections: [
+      {
+        heading: "The 4K Advantage: Why Resolution Isn't Everything",
+        body:
+          "Extracting frames from 4K video technically gives you an 8.3-megapixel image. However, simply hitting \"screenshot\" on your video player often results in compressed, blurry artifacts. To get professional-grade design assets or mood board inspiration, you need a high-performance utility like TimexFrame that handles decoding and extraction in a dedicated client-side pipeline.",
+      },
+      {
+        heading: "Step 1: Choosing the Right Extraction Mode",
+        body:
+          "To get the \"perfection from motion\" promised by the 4K format, you need to be precise about which frames you grab. Precise Frame Capture: Don't settle for \"close enough.\" Use tools that allow extraction at exact timestamps down to the millisecond to capture the absolute peak of action or the perfect expression. Smart Suggestions: Manually scrubbing through a 4K file for the sharpest shot is tedious. TimexFrame's Smart Mode automatically highlights the sharpest and best-lit frames, ensuring you always pick a winner without the guesswork. Interval Extraction: If you need a full visual summary of a project, extract a frame every N seconds to create a comprehensive overview of your 4K footage.",
+      },
+      {
+        heading: "Step 2: Optimizing Your Output Settings",
+        body:
+          "A 4K frame is only as good as the format you save it in. When working in the TimexFrame Extraction Settings panel, consider these advanced options. Output Formats: PNG is the gold standard for crispness because it is lossless, meaning every bit of that 4K detail is preserved without compression artifacts. JPG is best for quick sharing or when file size is a concern; set Quality to 90% or higher to minimize banding in high-resolution gradients. WEBP is a modern middle ground that offers excellent quality at smaller file sizes than PNG.",
+      },
+      {
+        heading: "Step 3: Handling the Workflow Like a Pro",
+        body:
+          "Processing 4K video can be taxing on local hardware, so workflow discipline matters. Upload & Go: Drag and drop your MP4, MOV, or WEBM file to start quickly with no sign-up. Local Extraction Speed: TimexFrame processes frames in-browser so you can preview and export without waiting on server queues. Bulk Download: Once you've selected your favorite stills, download them all at once as a single ZIP file with one click.",
+      },
+      {
+        heading: "Privacy First",
+        body:
+          "When working with high-value 4K assets, security is paramount. TimexFrame follows a local-processing model so your files stay on your device during extraction. No accounts are required, and you keep full control over when and where exported frames are saved.",
+      },
+    ],
+  },
   {
     slug: "how-to-extract-frames",
     category: "Tutorial",
@@ -223,8 +338,6 @@ function BlogCard({ post }: { post: BlogPost }) {
 }
 
 export default function BlogPage() {
-  const [featuredPost, ...otherPosts] = BLOG_POSTS;
-
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
@@ -254,6 +367,7 @@ export default function BlogPage() {
       <Header />
 
       <main className="bg-white">
+        {/* Hero */}
         <section className="border-b border-zinc-100 bg-gradient-to-b from-white via-white to-zinc-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-400 mb-3">Blog</p>
@@ -280,66 +394,8 @@ export default function BlogPage() {
           </div>
         </section>
 
-        <section className="py-12 bg-zinc-50 border-b border-zinc-100">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-            <article className="rounded-3xl border border-zinc-200 bg-white p-7 shadow-sm">
-              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
-                <span className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-600">Featured article</span>
-                <span>{featuredPost.dateLabel}</span>
-                <span>{featuredPost.readTime}</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 mb-3">{featuredPost.title}</h2>
-              <p className="text-zinc-500 leading-relaxed mb-5">{featuredPost.seoDescription}</p>
-
-              <div className="grid gap-3 sm:grid-cols-2 mb-6">
-                {featuredPost.summary.map((point) => (
-                  <div key={point} className="rounded-2xl bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
-                    {point}
-                  </div>
-                ))}
-              </div>
-
-              <Link href={`/blog/${featuredPost.slug}`}>
-                <Button className="bg-zinc-900 hover:bg-zinc-700 text-white rounded-lg font-semibold">
-                  Read featured guide
-                </Button>
-              </Link>
-            </article>
-
-            <aside className="rounded-3xl border border-zinc-200 bg-zinc-900 p-7 text-white shadow-sm">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <h2 className="text-xl font-semibold mb-3">Built for content-heavy SEO pages</h2>
-              <p className="text-sm leading-relaxed text-zinc-300 mb-5">
-                Each blog post has its own route, meta title, meta description, and canonical URL so search engines
-                can index every guide separately.
-              </p>
-              <ul className="space-y-3 text-sm text-zinc-200">
-                <li>• External blog routes for faster homepage loading</li>
-                <li>• Dedicated titles and descriptions per article</li>
-                <li>• Structured article markup for better discoverability</li>
-              </ul>
-            </aside>
-          </div>
-        </section>
-
-        <section className="py-16 bg-zinc-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-2">Latest articles</p>
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900">Browse the full TimexFrame blog</h2>
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {otherPosts.map((post) => (
-                <BlogCard key={post.slug} post={post} />
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Document-style feed with sticky sidebar */}
+        <BlogLayout />
       </main>
 
       <Footer />
@@ -349,6 +405,42 @@ export default function BlogPage() {
 
 export function BlogPostPage({ slug }: { slug: string }) {
   const post = BLOG_POSTS.find((entry) => entry.slug === slug);
+  const { scrollYProgress } = useScroll();
+  const [activeSection, setActiveSection] = useState<string>("");
+
+  const sectionIds = useMemo(() => {
+    if (!post) return [];
+    return post.sections.map((section) => toSectionId(section.heading));
+  }, [post]);
+
+  useEffect(() => {
+    if (!sectionIds.length) return;
+
+    setActiveSection(sectionIds[0]);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visible[0]?.target?.id) {
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: "-20% 0px -65% 0px",
+        threshold: [0.2, 0.4, 0.6, 0.8],
+      },
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [sectionIds, slug]);
 
   if (!post) {
     return (
@@ -381,6 +473,11 @@ export function BlogPostPage({ slug }: { slug: string }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
+      <motion.div
+        className="fixed left-0 right-0 top-0 z-[60] h-1 origin-left bg-zinc-900"
+        style={{ scaleX: scrollYProgress }}
+      />
+
       <SeoHead
         title={post.seoTitle}
         description={post.seoDescription}
@@ -419,117 +516,136 @@ export function BlogPostPage({ slug }: { slug: string }) {
       <Header />
 
       <main className="bg-white">
-        <section className="border-b border-zinc-100">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-            <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
-              <Link href="/" className="hover:text-zinc-900">Home</Link>
-              <span>/</span>
-              <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
-              <span>/</span>
-              <span className="text-zinc-700">{post.category}</span>
-            </nav>
+        {/* ── Document header ─────────────────────────────────────────────── */}
+        <div className="max-w-[720px] mx-auto px-4 sm:px-6 pt-12 pb-0">
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
+            <Link href="/" className="hover:text-zinc-900 transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/blog" className="hover:text-zinc-900 transition-colors">Blog</Link>
+            <span>/</span>
+            <span className="text-zinc-600">{post.category}</span>
+          </nav>
 
-            <div className="mb-3 flex flex-wrap items-center gap-3 text-xs text-zinc-400">
-              <span className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-600">{post.category}</span>
-              <span>{post.dateLabel}</span>
-              <span>{post.readTime}</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-5 max-w-4xl">{post.title}</h1>
-            <p className="text-lg text-zinc-500 leading-relaxed max-w-3xl">{post.seoDescription}</p>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-widest text-zinc-400 mb-1">Published</p>
-                <p className="text-sm font-medium text-zinc-900">{post.dateLabel}</p>
-              </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-widest text-zinc-400 mb-1">Reading time</p>
-                <p className="text-sm font-medium text-zinc-900">{post.readTime}</p>
-              </div>
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-widest text-zinc-400 mb-1">Focus</p>
-                <p className="text-sm font-medium text-zinc-900">{post.category}</p>
-              </div>
-            </div>
+          {/* Metadata line */}
+          <div className="mb-5 flex flex-wrap items-center gap-2 text-sm text-zinc-400">
+            <span className="font-semibold uppercase tracking-wider text-xs text-zinc-500">{post.category}</span>
+            <span aria-hidden="true">·</span>
+            <time dateTime={post.publishedAt}>{post.dateLabel}</time>
+            <span aria-hidden="true">·</span>
+            <span>{post.readTime}</span>
           </div>
-        </section>
 
-        <section className="py-16 bg-zinc-50">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-            <article className="space-y-6">
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-zinc-900 mb-3">What you'll learn</h2>
-                <ul className="space-y-3 text-sm text-zinc-600">
-                  {post.summary.map((point) => (
-                    <li key={point} className="flex gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 rounded-full bg-zinc-900" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 leading-tight mb-6">
+            {post.title}
+          </h1>
+
+          {/* Lead paragraph */}
+          <p className="text-lg leading-relaxed text-zinc-600 border-b border-zinc-100 pb-10">
+            {post.seoDescription}
+          </p>
+        </div>
+
+        {/* ── Article body + ToC ───────────────────────────────────────────── */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-12">
+          <aside className="hidden lg:block">
+            <div className="sticky top-28">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-zinc-400">In this article</p>
+              <nav aria-label="Table of contents">
+                <ul className="space-y-2 text-sm">
+                  {post.sections.map((section) => {
+                    const id = toSectionId(section.heading);
+                    const isActive = activeSection === id;
+                    return (
+                      <li key={section.heading}>
+                        <a
+                          href={`#${id}`}
+                          className={[
+                            "block rounded px-2 py-1 transition-colors",
+                            "focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900",
+                            isActive ? "bg-zinc-100 font-semibold text-zinc-900" : "text-zinc-500 hover:text-zinc-900",
+                          ].join(" ")}
+                        >
+                          {section.heading}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
-              </div>
+              </nav>
+            </div>
+          </aside>
 
-              {post.sections.map((section) => (
-                <article key={section.heading} className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                  <h2 id={toSectionId(section.heading)} className="text-xl font-semibold text-zinc-900 mb-2 scroll-mt-24">
-                    {section.heading}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-zinc-500">{section.body}</p>
-                </article>
-              ))}
+          <article className="max-w-screen-md space-y-12">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-4">
+                What you'll learn
+              </p>
+              <ul className="space-y-3">
+                {post.summary.map((point) => (
+                  <li key={point} className="flex gap-3 text-base text-zinc-700 leading-relaxed">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-400" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-zinc-900 mb-2">Ready to try it?</h2>
-                <p className="text-sm leading-relaxed text-zinc-500 mb-4">
-                  Go back to the homepage and use the inline upload flow, feature overview, how-it-works guide, and FAQ without leaving the main experience.
+            {post.sections.map((section) => (
+              <section key={section.heading}>
+                <h2
+                  id={toSectionId(section.heading)}
+                  className="mb-5 border-l-4 border-primary pl-4 text-2xl font-black tracking-tight text-zinc-900 scroll-mt-24"
+                >
+                  {section.heading}
+                </h2>
+                <p className="whitespace-pre-line text-base leading-relaxed text-zinc-600">
+                  {section.body}
                 </p>
-                <Link href="/">
-                  <Button className="bg-zinc-900 hover:bg-zinc-700 text-white rounded-lg font-semibold">
-                    Open TimexFrame
-                  </Button>
-                </Link>
-              </div>
-            </article>
+              </section>
+            ))}
 
-            <aside className="space-y-4">
-              <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">In this article</h2>
-                <ul className="space-y-2 text-sm text-zinc-600">
-                  {post.sections.map((section) => (
-                    <li key={section.heading}>
-                      <a href={`#${toSectionId(section.heading)}`} className="hover:text-zinc-900">
-                        {section.heading}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="pt-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-3">Try it now</p>
+              <p className="text-base leading-relaxed text-zinc-600 mb-5 max-w-[55ch]">
+                Go back to the homepage and use the upload flow — no sign-up, no install, nothing leaves your device.
+              </p>
+              <Link href="/">
+                <Button className="bg-zinc-900 hover:bg-zinc-700 text-white rounded-lg font-semibold">
+                  Open TimexFrame
+                </Button>
+              </Link>
+            </div>
+          </article>
+        </div>
 
-              <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">SEO keywords</h2>
-                <div className="flex flex-wrap gap-2">
-                  {post.keywords.map((keyword) => (
-                    <span key={keyword} className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </aside>
-          </div>
-        </section>
-
+        {/* ── Related articles ─────────────────────────────────────────────── */}
         {relatedPosts.length > 0 && (
-          <section className="pb-16 bg-zinc-50">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-2xl font-bold tracking-tight text-zinc-900 mb-6">Related articles</h2>
-              <div className="grid gap-6 md:grid-cols-2">
+          <div className="max-w-[720px] mx-auto px-4 sm:px-6 pb-20">
+            <div className="border-t border-zinc-100 pt-12">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-8">Related articles</p>
+              <div className="space-y-10">
                 {relatedPosts.map((relatedPost) => (
-                  <BlogCard key={relatedPost.slug} post={relatedPost} />
+                  <div key={relatedPost.slug} className="border-b border-zinc-100 pb-10 last:border-0 last:pb-0">
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+                      <span className="font-semibold uppercase tracking-wider text-zinc-500">{relatedPost.category}</span>
+                      <span>·</span>
+                      <span>{relatedPost.dateLabel}</span>
+                      <span>·</span>
+                      <span>{relatedPost.readTime}</span>
+                    </div>
+                    <h3 className="text-xl font-bold tracking-tight text-zinc-900 mb-2">
+                      <Link href={`/blog/${relatedPost.slug}`} className="hover:text-zinc-600 transition-colors">
+                        {relatedPost.title}
+                      </Link>
+                    </h3>
+                    <p className="text-sm leading-relaxed text-zinc-600 max-w-[60ch]">{relatedPost.excerpt}</p>
+                  </div>
                 ))}
               </div>
             </div>
-          </section>
+          </div>
         )}
       </main>
 
