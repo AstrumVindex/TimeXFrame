@@ -31,6 +31,55 @@ const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "the-edge-of-the-browser-client-side-gpu-processing",
+    category: "Engineering",
+    title: "The Edge of the Browser: How Client-Side GPU Processing is Revolutionizing Video Tools",
+    excerpt:
+      "The days of upload-and-wait are over. Modern browsers now leverage local silicon for low-latency, privacy-first video workflows that feel like native software.",
+    seoTitle: "The Edge of the Browser: How Client-Side GPU Processing is Revolutionizing Video Tools",
+    seoDescription:
+      "How WebAssembly and hardware-accelerated browser APIs are shifting video decoding to the user device for faster performance, stronger privacy, and smarter hybrid AI workflows.",
+    keywords: [
+      "client-side gpu video processing",
+      "browser video decoding",
+      "webassembly video tools",
+      "privacy-first frame extraction",
+      "edge ai video analysis",
+      "timexframe architecture",
+    ],
+    dateLabel: "April 13, 2026",
+    publishedAt: "2026-04-13",
+    updatedAt: "2026-04-13",
+    readTime: "7 min read",
+    summary: [
+      "Modern browser runtimes are replacing upload-first pipelines by pushing heavy decoding work to local hardware.",
+      "Local extraction improves latency, lowers infrastructure overhead, and keeps source media private by default.",
+      "Hybrid edge workflows combine on-device speed with selective server-side AI analysis for smarter suggestions.",
+    ],
+    sections: [
+      {
+        heading: "The Infrastructure Shift",
+        body:
+          "For years, video manipulation on the web followed a rigid pattern: the user uploaded a file to a central server, a high-powered CPU (usually running FFmpeg) processed the request, and the result was sent back. This was slow, expensive for the developer, and a nightmare for user privacy.\n\nIn 2026, the browser is no longer just a window for viewing content. It is a high-performance engine. By utilizing WebAssembly (Wasm) and hardware-accelerated canvas and media APIs, modern tools are moving the factory directly to the user's RAM.",
+      },
+      {
+        heading: "Tapping into the Silicon",
+        body:
+          "Most modern smartphones and laptops contain dedicated hardware decoders. When you watch a 4K video, your main CPU is barely working. A specialized media block handles the heavy lifting.\n\nTimexFrame taps into this local power. Instead of taxing a server in a remote data center, it uses your device to seek and capture frames quickly and efficiently. This results in lower latency, where seeking to a timestamp happens in milliseconds instead of seconds, and better energy efficiency compared with transmitting large media files across the globe.",
+      },
+      {
+        heading: "The Privacy Paradigm",
+        body:
+          "The biggest benefit of this shift is not only speed. It is security. When extraction happens locally, your source video never leaves your device. In an era of data leaks and aggressive model scraping, client-side processing is a meaningful privacy control. You are not only saving time. You are protecting intellectual property.",
+      },
+      {
+        heading: "The Hybrid Future: AI at the Edge",
+        body:
+          "The final piece is edge analysis. While your device handles decoding and extraction, backend services can score temporary low-resolution thumbnails for sharpness or scene quality in Smart Mode.\n\nThis hybrid design combines local hardware speed with backend intelligence, producing a workflow that feels like native desktop software while running inside a single browser tab.",
+      },
+    ],
+  },
+  {
     slug: "mastering-the-frame-high-resolution-extraction",
     category: "Deep Dive",
     title: "Mastering the Frame: The Technical Art of High-Resolution Extraction",
@@ -227,44 +276,149 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
   },
   {
-    slug: "frame-extraction-for-teams",
+    slug: "creative-team-workflows",
     category: "Workflow",
-    title: "Why Fast Frame Extraction Helps Creative Teams Move Faster",
+    title: "The Hidden ROI of Frame Extraction in Creative Team Workflows",
     excerpt:
-      "From marketing approvals to classroom presentations, fast frame capture reduces back-and-forth and helps teams make decisions sooner.",
-    seoTitle: "Why Fast Frame Extraction Helps Creative Teams Move Faster",
+      "Stop the video scrubbing marathons. Discover how lightweight still-frame review sets are becoming the secret weapon for creative directors across Notion, Slack, and client decks.",
+    seoTitle: "The Hidden ROI of Frame Extraction in Creative Team Workflows",
     seoDescription:
-      "See how quick frame extraction helps creative, marketing, and education teams share visual references faster and keep decisions moving.",
+      "Stop the video scrubbing marathons. Discover how lightweight still-frame review sets are becoming the secret weapon for creative directors across Notion, Slack, and client decks.",
     keywords: [
+      "video frame extractor",
+      "frame extractor from video",
+      "video extractor",
       "creative workflow",
-      "frame extraction for teams",
-      "video stills for marketing",
-      "storyboard reference frames",
+      "video frame review sets",
+      "client approvals with still frames",
     ],
-    dateLabel: "March 31, 2026",
-    publishedAt: "2026-03-31",
-    updatedAt: "2026-03-31",
+    dateLabel: "April 10, 2026",
+    publishedAt: "2026-04-10",
+    updatedAt: "2026-04-10",
     readTime: "4 min read",
     summary: [
-      "Replace repeated video scrubbing with quick still-frame review sets.",
-      "Share lightweight references in decks, docs, and team chats.",
-      "Keep output quality consistent across creative reviews and approvals.",
+      "Heavy video files slow down collaboration in tools like Slack, Notion, and client decks.",
+      "Extracted still-frame sets create a lightweight visual map that speeds approvals and storyboarding.",
+      "Local-first extraction removes upload delays and improves creative team throughput.",
     ],
     sections: [
       {
-        heading: "Speed up review cycles",
+        heading: "Why Every Creative Team Needs a Video Extractor",
         body:
-          "Instead of scrubbing through a video repeatedly, teams can extract a set of representative stills and review them together in minutes.",
+          "In the fast-paced world of digital production, time is the only currency that matters. Yet many teams still waste hours scrubbing through raw footage just to find a single reference point. A professional video frame extractor changes this workflow by turning heavy video files into lightweight, actionable assets.\n\nVideo files are difficult to share quickly in Slack, and even harder to embed cleanly in tools like Notion or Trello without friction. When you extract frames from video, you are creating a visual map of your project, not just taking screenshots. This lets creative directors speed client approvals, enhance storyboarding with real footage references, and simplify technical documentation with high-quality stills.",
       },
       {
-        heading: "Create lightweight visual references",
+        heading: "The Power of the Frame Extractor",
         body:
-          "Frames are much easier to share in docs, slides, and chats than large video files. That keeps communication fast and focused.",
+          "Not all tools are built for professional workflows. A dependable frame extractor from video should handle high-resolution footage without breaking the browser session.\n\nWith TimexFrame, teams can define precise intervals or frame counts to capture exactly what they need. Whether you are finding a transition moment or selecting the best hero shot for a thumbnail, pulling a video frame at native resolution instantly and privately is quickly becoming standard practice.",
       },
       {
-        heading: "Keep quality consistent",
+        heading: "Efficiency at the Edge",
         body:
-          "When the same tool is used to generate stills from the original source, everyone works from a consistent set of assets without manual screenshots.",
+          "The real ROI is speed. A modern video extractor that processes media locally on your device removes the upload wall entirely. Instead of waiting for gigabytes to reach a server just to return a handful of JPEGs, teams can move directly from footage to decision-ready references.\n\nWith the right video frame extractor, creative teams replace scrubbing marathons with a faster, simpler, and more efficient production cycle.",
+      },
+    ],
+  },
+  {
+    slug: "timestamp-mode-mastery",
+    category: "Deep Dive",
+    title: "Mastering Timestamp Mode: Exact Frame Pulls for High-Stakes Projects",
+    excerpt:
+      "Timestamp mode gives you surgical precision over which frame you extract, down to the millisecond. This deep dive covers when to use it, how the timecode maths works, and why it matters for documentary editors and forensic analysts alike.",
+    seoTitle: "Mastering Timestamp Mode: Exact Frame Pulls for High-Stakes Projects",
+    seoDescription:
+      "Timestamp mode gives you surgical precision over which frame you extract, down to the millisecond. This deep dive covers when to use it, how the timecode maths works, and why it matters for documentary editors and forensic analysts alike.",
+    keywords: [
+      "timestamp mode video extractor",
+      "exact frame pulls",
+      "video timecode extraction",
+      "forensic video frame analysis",
+      "documentary frame extraction",
+      "native resolution video frames",
+    ],
+    dateLabel: "April 12, 2026",
+    publishedAt: "2026-04-12",
+    updatedAt: "2026-04-12",
+    readTime: "7 min read",
+    summary: [
+      "Timestamp Mode is built for workflows where exact frame accuracy matters more than rough seeking.",
+      "Hardware-accelerated browser decoding plus canvas capture makes repeatable, native-resolution still extraction possible.",
+      "Forensics, sports science, and documentary work benefit from precise, shareable timecode-based reference frames.",
+    ],
+    sections: [
+      {
+        heading: "The Science of the Millisecond",
+        body:
+          "In many creative projects, close enough is fine. But in high-stakes environments such as legal forensics, scientific observation, or frame-accurate documentary editing, accuracy is everything. When you need a video frame from exactly 00:04.179, a standard slider will not cut it. You need a dedicated video frame extractor that speaks the language of timecodes.\n\nMost web-based video tools struggle with precision because they rely on low-fidelity seeking. TimexFrame is different. By using the browser's hardware-accelerated decoding, Timestamp Mode allows you to input exact values and work from a more reliable extraction path.",
+      },
+      {
+        heading: "How the Timecode Maths Works",
+        body:
+          "Input: You provide the exact moment, such as 14.346 seconds.\n\nSeek: The hidden video engine jumps to the nearest precise hardware-decoded frame context.\n\nCapture: The Canvas API paints that specific frame at native resolution, avoiding the UI-layer artifacts and softness that come from ordinary screenshots.\n\nThe result is a much more dependable path for extracting the exact frame you intended to review or document.",
+      },
+      {
+        heading: "When Precision Is Non-Negotiable",
+        body:
+          "While a general video extractor is useful for social media and content workflows, Timestamp Mode matters most in professional niches where exactness has real consequences.\n\nForensic Analysis: Identify a license plate, gesture, or face in a narrow slice of time where every millisecond matters.\n\nSports Science: Pull the exact frame of a golf swing, sprint finish, or landing position to analyze form.\n\nDocumentary Archiving: Match a still image precisely to historical production notes or logged archive timecodes.",
+      },
+      {
+        heading: "Why Native Extraction Matters",
+        body:
+          "Standard screenshots often capture the playback UI or introduce additional compression. When you extract frames from video using a dedicated frame extractor from video, you are pulling the actual pixel data rendered from the stream rather than settling for a lossy screen grab.\n\nAs seen in TimexFrame's updated extraction flow, this method is faster and more stable on constrained devices, especially on mobile, where older upload-heavy workflows are more likely to hang or stall.",
+      },
+      {
+        heading: "Repeatable Accuracy",
+        body:
+          "The real strength of Timestamp Mode is repeatability. If you share a timestamp with a colleague, they can pull the exact same video frame on their device. That creates a shared point of truth for the team and removes the ambiguity of somewhere around the four-second mark.\n\nFor high-stakes projects, repeatable frame references are not a convenience. They are the workflow.",
+      },
+    ],
+  },
+  {
+    slug: "analogue-trends-2026",
+    category: "Trend Watch",
+    title: "Analogue Aesthetics in 2026: Why Film-Style Stills Are Dominating Feeds",
+    excerpt:
+      "From grain simulators to LUT-pulled bleach bypasses, the analogue resurgence reshaping visual culture is not slowing down. We unpack why extracted video frames — not DSLRs — have become the go-to source for that lo-fi look.",
+    seoTitle: "Analogue Aesthetics in 2026: Why Film-Style Stills Are Dominating Feeds",
+    seoDescription:
+      "Discover why video frame extraction has become the go-to method for achieving the analogue, film-style aesthetic that dominates social feeds in 2026.",
+    keywords: [
+      "analogue aesthetics 2026",
+      "film style video stills",
+      "lo-fi frame extraction",
+      "cinematic video frames",
+      "motion blur photography",
+      "video frame to photo",
+    ],
+    dateLabel: "April 8, 2026",
+    publishedAt: "2026-04-08",
+    updatedAt: "2026-04-08",
+    readTime: "5 min read",
+    summary: [
+      "Perfection fatigue is driving creators toward the imperfect, hazy, and cinematic aesthetic of analogue film.",
+      "Video frames carry kinetic energy and natural motion blur that staged photos can't replicate.",
+      "TimexFrame's local-first extraction lets you pull bit-perfect stills from your footage without sacrificing privacy.",
+    ],
+    sections: [
+      {
+        heading: "The Death of the \"Perfect\" Photo",
+        body:
+          "For a decade, the goal of digital photography was clinical perfection: more megapixels, sharper edges, and zero noise. But in 2026, we've reached \"perfection fatigue.\" The modern eye is gravitating toward the imperfect, the hazy, and the cinematic.\n\nThis is where video frame extraction comes in. Unlike a staged photograph, a frame pulled from a moving video carries a specific kind of kinetic energy. It captures a \"micro-moment\" that a shutter-click often misses — a half-smile, a blur of motion, or a candid glance.",
+      },
+      {
+        heading: "Why Frames Feel Like Film",
+        body:
+          "There is a technical reason why a frame from a 4K video feels more like a 35mm film still than a standard digital photo:\n\nNatural Motion Blur: Videos are typically shot with a 180-degree shutter rule, creating a soft, natural blur that mimics the way the human eye perceives movement.\n\nThe Narrative Context: A still frame is a \"slice\" of a larger story. When you look at an extracted frame, your brain subconsciously fills in the seconds before and after, giving the image a cinematic weight.\n\nThe Texture of Light: Modern video sensors handle dynamic range differently than still sensors. Extracting a frame allows you to capture the \"organic\" roll-off of highlights that defines the analogue aesthetic.",
+      },
+      {
+        heading: "Precision Meets Privacy: The TimexFrame Approach",
+        body:
+          "In the past, getting a high-quality still from a video meant compromising. You either took a low-res screenshot — losing all the detail — or uploaded your private footage to a slow, clunky server.\n\nAt TimexFrame, we've rebuilt this workflow for the modern creator. By shifting the processing power to your own device, we allow for:\n\nBit-Perfect Extraction: Pulling the raw data from the video stream at its native resolution.\n\nInstantaneous Workflow: Browsing through hundreds of frames in seconds to find that one perfect, filmic moment.\n\nComplete Privacy: Your video never leaves your browser, ensuring your creative process remains yours alone.",
+      },
+      {
+        heading: "How to Achieve the Look",
+        body:
+          "To get that dominant \"Analogue Feed\" look, start with a high-bitrate video. Use Smart Extraction to find frames with high sharpness but natural motion. Once extracted, apply a subtle grain overlay and a slight green-magenta split tone.\n\nThe result isn't just a picture; it's a mood.",
       },
     ],
   },
@@ -367,33 +521,6 @@ export default function BlogPage() {
       <Header />
 
       <main className="bg-white">
-        {/* Hero */}
-        <section className="border-b border-zinc-100 bg-gradient-to-b from-white via-white to-zinc-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-zinc-400 mb-3">Blog</p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-5 max-w-4xl">
-              SEO-friendly guides for better video frame extraction and sharper thumbnail choices.
-            </h1>
-            <p className="text-lg text-zinc-500 max-w-3xl leading-relaxed">
-              Explore practical articles about extracting high-quality stills, selecting stronger video frames,
-              and improving team review workflows without slowing down your homepage experience.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-2">
-              {[
-                "Video frame extraction",
-                "Thumbnail selection",
-                "High-quality stills",
-                "Creative workflow tips",
-              ].map((topic) => (
-                <span key={topic} className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600">
-                  {topic}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Document-style feed with sticky sidebar */}
         <BlogLayout />
       </main>

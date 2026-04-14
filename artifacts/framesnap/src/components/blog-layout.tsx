@@ -33,11 +33,21 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "the-edge-of-the-browser-client-side-gpu-processing",
+    category: "Engineering",
+    title: "The Edge of the Browser: How Client-Side GPU Processing is Revolutionizing Video Tools",
+    description:
+      "The days of upload-and-wait are over. Learn how TimexFrame uses client-side GPU-assisted decoding with WebAssembly-era browser APIs to deliver faster extraction, stronger privacy, and hybrid edge AI workflows.",
+    date: "April 13, 2026",
+    readingTime: 7,
+    imageUrl: "/edge-browser-gpu.png",
+  },
+  {
     slug: "mastering-the-frame-high-resolution-extraction",
     category: "Deep Dive",
     title: "Mastering the Frame: The Technical Art of High-Resolution Extraction",
     description:
-      "Why simple screenshots fail and how professional-grade server-side processing preserves the soul of your 4K footage. Learn GOP reconstruction, blur scoring, color fidelity, and privacy-first extraction workflows.",
+      "Why simple screenshots fail and how professional-grade client-side processing preserves the soul of your 4K footage. Learn GOP reconstruction, blur scoring, color fidelity, and privacy-first extraction workflows.",
     date: "April 12, 2026",
     readingTime: 9,
     imageUrl: "https://picsum.photos/seed/masteringframe/800/450",
@@ -70,7 +80,7 @@ export const blogPosts: BlogPost[] = [
       "Replace video scrubbing marathons with lightweight still-frame review sets that travel easily across Notion pages, Slack threads, and client decks. Here's the repeatable process creative directors are quietly adopting.",
     date: "April 10, 2026",
     readingTime: 4,
-    imageUrl: "https://picsum.photos/seed/teamworkflow/800/450",
+    imageUrl: "/Hidden-ROI.png",
   },
   {
     slug: "timestamp-mode-mastery",
@@ -80,13 +90,9 @@ export const blogPosts: BlogPost[] = [
       "Timestamp mode gives you surgical precision over which frame you extract, down to the millisecond. This deep dive covers when to use it, how the timecode maths works, and why it matters for documentary editors and forensic analysts alike.",
     date: "April 12, 2026",
     readingTime: 7,
-    imageUrl: "https://picsum.photos/seed/timestamp/800/450",
+    imageUrl: "/Mastering-Timestamp.png",
   },
 ];
-
-// ──── Derived constants ───────────────────────────────────────────────────────
-const UNIQUE_CATEGORIES = Array.from(new Set(blogPosts.map((p) => p.category)));
-const ALL_CATEGORIES = ["All", ...UNIQUE_CATEGORIES];
 
 // ──── Component ───────────────────────────────────────────────────────────────
 
@@ -97,17 +103,14 @@ const ALL_CATEGORIES = ["All", ...UNIQUE_CATEGORIES];
  */
 export function BlogLayout() {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState("All");
 
   const filtered: FeedPost[] = blogPosts.filter((post) => {
-    const matchesCategory =
-      activeCategory === "All" || post.category === activeCategory;
     const q = query.trim().toLowerCase();
     const matchesQuery =
       q === "" ||
       post.title.toLowerCase().includes(q) ||
       post.description.toLowerCase().includes(q);
-    return matchesCategory && matchesQuery;
+    return matchesQuery;
   });
 
   return (
@@ -132,7 +135,10 @@ export function BlogLayout() {
         </section>
 
         {/* ── Column 2: Sticky Sidebar ─────────────────────────────────── */}
-        <aside aria-label="Blog sidebar" className="sticky top-24 h-fit space-y-8">
+        <aside
+          aria-label="Blog sidebar"
+          className="order-first space-y-8 md:order-none md:sticky md:top-24 md:h-fit"
+        >
 
           {/* Search */}
           <div>
@@ -156,61 +162,6 @@ export function BlogLayout() {
                 className="pl-9"
               />
             </div>
-          </div>
-
-          {/* Category filter */}
-          <div>
-            <p className="mb-3 text-sm font-semibold text-zinc-900" id="category-filter-label">
-              Categories
-            </p>
-            <ul className="space-y-1" role="list" aria-labelledby="category-filter-label">
-              {ALL_CATEGORIES.map((cat) => {
-                const count =
-                  cat === "All"
-                    ? blogPosts.length
-                    : blogPosts.filter((p) => p.category === cat).length;
-                const isActive = activeCategory === cat;
-                return (
-                  <li key={cat}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveCategory(cat)}
-                      aria-pressed={isActive}
-                      className={[
-                        "w-full rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                        "focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-1",
-                        isActive
-                          ? "bg-zinc-900 font-semibold text-white"
-                          : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
-                      ].join(" ")}
-                    >
-                      {cat}
-                      <span className="ml-1.5 text-xs text-zinc-400" aria-label={`${count} articles`}>
-                        ({count})
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Quick Extract CTA */}
-          <div className="rounded-2xl bg-zinc-900 p-5 text-white">
-            <h2 className="mb-1.5 text-sm font-semibold">Ready to extract frames?</h2>
-            <p className="mb-4 text-xs leading-relaxed text-zinc-400">
-              Drop in any MP4, MOV, or WEBM file and get sharp stills in seconds —
-              no upload required.
-            </p>
-            <Link href="/">
-              <Button
-                size="sm"
-                className="w-full bg-white font-semibold text-zinc-900 hover:bg-zinc-100 focus-visible:ring-white"
-              >
-                <Zap className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                Quick Extract
-              </Button>
-            </Link>
           </div>
 
         </aside>

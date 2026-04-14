@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon, X, ArrowDownToLine } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Download, Sparkles, Trash2, Loader2, Image as ImageIcon, X, ArrowDownToLine, ChevronLeft, ChevronRight } from "lucide-react";
 import JSZip from "jszip";
 
 interface FrameGalleryProps {
@@ -46,16 +47,27 @@ function downloadFrame(frame: LocalFrame) {
 interface LightboxProps {
   frame: LocalFrame | null;
   onClose: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  currentIndex?: number;
+  total?: number;
 }
 
-function Lightbox({ frame, onClose }: LightboxProps) {
-  // Close on ESC key
+function Lightbox({ frame, onClose, onPrev, onNext, currentIndex, total }: LightboxProps) {
+  const hasPrev = !!onPrev && (currentIndex ?? 0) > 0;
+  const hasNext = !!onNext && (currentIndex ?? 0) < (total ?? 1) - 1;
+
+  // Keyboard navigation: ESC, ArrowLeft, ArrowRight
   useEffect(() => {
     if (!frame) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft" && hasPrev) onPrev?.();
+      if (e.key === "ArrowRight" && hasNext) onNext?.();
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [frame, onClose]);
+  }, [frame, onClose, onPrev, onNext, hasPrev, hasNext]);
 
   if (!frame) return null;
 
@@ -72,6 +84,9 @@ function Lightbox({ frame, onClose }: LightboxProps) {
         <div className="absolute -top-11 left-0 right-0 flex items-center justify-between">
           <span className="text-white/50 text-xs font-mono">{frame.filename}</span>
           <div className="flex items-center gap-3">
+            {total !== undefined && total > 1 && (
+              <span className="text-white/40 text-xs font-mono">{(currentIndex ?? 0) + 1} / {total}</span>
+            )}
             <button
               onClick={() => downloadFrame(frame)}
               className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
@@ -93,6 +108,28 @@ function Lightbox({ frame, onClose }: LightboxProps) {
           alt={`Frame at ${formatTime(frame.timestamp)}`}
           className="w-full rounded-xl shadow-2xl object-contain max-h-[80vh]"
         />
+
+        {/* Left arrow */}
+        {hasPrev && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onPrev(); }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors"
+            aria-label="Previous frame"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+
+        {/* Right arrow */}
+        {hasNext && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onNext(); }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors"
+            aria-label="Next frame"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
 
         {/* Timestamp label */}
         <div className="absolute bottom-4 left-4 px-3 py-1 rounded-lg bg-black/70 backdrop-blur text-white text-sm font-mono">
@@ -121,6 +158,7 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
   const [previewFrame, setPreviewFrame] = useState<LocalFrame | null>(null);
+  const isMobile = useIsMobile();
 
   // Reset local selection/deletion when a new extraction runs
   useEffect(() => {
@@ -235,7 +273,22 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
   return (
     <div className="space-y-6 relative pb-24">
       {/* Lightbox modal */}
-      <Lightbox frame={previewFrame} onClose={() => setPreviewFrame(null)} />
+      <Lightbox
+        frame={previewFrame}
+        onClose={() => setPreviewFrame(null)}
+        currentIndex={previewFrame ? visibleFrames.findIndex((f) => f.id === previewFrame.id) : 0}
+        total={visibleFrames.length}
+        onPrev={() => {
+          if (!previewFrame) return;
+          const idx = visibleFrames.findIndex((f) => f.id === previewFrame.id);
+          if (idx > 0) setPreviewFrame(visibleFrames[idx - 1]);
+        }}
+        onNext={() => {
+          if (!previewFrame) return;
+          const idx = visibleFrames.findIndex((f) => f.id === previewFrame.id);
+          if (idx < visibleFrames.length - 1) setPreviewFrame(visibleFrames[idx + 1]);
+        }}
+      />
 
       {/* Header row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -303,7 +356,7 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
                 <div className={`absolute inset-0 transition-colors duration-300 pointer-events-none ${isSelected ? "bg-black/10" : "bg-black/0 group-hover:bg-black/25"}`} />
 
                 {/* Checkbox top-right */}
-                <div className={`absolute top-2.5 right-2.5 transition-opacity duration-200 z-10 ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                <div className={`absolute top-2.5 right-2.5 transition-opacity duration-200 z-10 ${isSelected || isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -321,7 +374,7 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
 
                 {/* Action buttons top-left (on hover, not selected) */}
                 {!isSelected && (
-                  <div className="absolute top-2.5 left-2.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
+                  <div className={`absolute top-2.5 left-2.5 z-10 transition-opacity duration-200 flex gap-1.5 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                     {/* Delete */}
                     <button
                       onClick={(e) => handleDeleteFrame(frame, e)}
@@ -342,7 +395,7 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
                 )}
 
                 {/* Suggested badge */}
-                {frame.suggested && !isSelected && (
+                {frame.suggested && !isSelected && !isMobile && (
                   <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
                     <Badge variant="secondary" className="bg-amber-100/90 backdrop-blur-sm text-amber-800 border-amber-200 shadow-sm font-medium text-[10px] px-1.5 py-0.5">
                       <Sparkles className="w-2.5 h-2.5 mr-1" /> Suggested

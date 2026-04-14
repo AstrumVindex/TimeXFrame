@@ -49,10 +49,7 @@ export default function ContactPage() {
         <section className="py-16 bg-zinc-50">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="rounded-2xl border border-zinc-200 bg-white p-6 md:p-8 shadow-sm">
-              <h2 className="text-2xl font-bold text-zinc-900 mb-2">Send us a message</h2>
-              <p className="text-sm text-zinc-500 mb-6">
-                Fill out the form below. Your message will be sent to timexframe4all@gmail.com.
-              </p>
+              <h2 className="text-2xl font-bold text-zinc-900 mb-6">Send us a message</h2>
 
               <form
                 action="https://formspree.io/f/mpqovkyk"

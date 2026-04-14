@@ -15,8 +15,14 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Settings2, ScanLine, Loader2, Plus, X, Timer, Hash,
-  Sparkles, Info,
+  Sparkles, Info, Square,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ExtractionPanelProps {
   session: LocalSession;
@@ -29,15 +35,39 @@ interface ExtractionPanelProps {
 
 type Mode = "interval" | "timestamp" | "framecount" | "smart";
 
-// Tooltip helper
+const ESTIMATED_MB_PER_FRAME: Record<"jpg" | "png" | "webp", number> = {
+  jpg: 0.24,
+  png: 0.40,
+  webp: 0.18,
+};
+
+// Tooltip helper — uses Radix portal so overflow-hidden parents don't clip it
 function Tip({ text }: { text: string }) {
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <span className="group relative inline-flex ml-1 align-middle cursor-help">
-      <Info className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 w-52 rounded-lg bg-zinc-900 text-white text-xs px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity z-50 leading-relaxed">
+    <Tooltip
+      open={isMobile ? isOpen : undefined}
+      onOpenChange={isMobile ? setIsOpen : undefined}
+    >
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label="Show info"
+          onClick={isMobile ? () => setIsOpen((prev) => !prev) : undefined}
+          className="inline-flex ml-1 align-middle cursor-help focus:outline-none"
+        >
+          <Info className="w-3.5 h-3.5 text-zinc-400 hover:text-zinc-600 transition-colors" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        className="max-w-[200px] text-xs leading-relaxed bg-zinc-900 text-white rounded-lg px-3 py-2"
+      >
         {text}
-      </span>
-    </span>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -90,6 +120,7 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
 
   // ── Estimation ──────────────────────────────────────────────────────────────
   const estimation = useMemo(() => {
+    const estimateSize = (frames: number) => `~${(frames * ESTIMATED_MB_PER_FRAME[format]).toFixed(1)} MB`;
     const duration = session.duration || 60;
     const start = startTime && isValidTs(startTime)
       ? startTime.split(":").reduce((a, v, i) => a + Number(v) * [3600, 60, 1][i], 0)
@@ -104,25 +135,25 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
       if (isNaN(iv) || iv <= 0) return null;
       const frames = Math.floor(span / iv) + 1;
       const baseTime = Math.ceil(frames * 0.1);
-      return { frames, size: `~${(frames * 0.4).toFixed(1)} MB`, time: `~${baseTime + 20} sec` };
+      return { frames, size: estimateSize(frames), time: `~${baseTime + 20} sec` };
     }
     if (mode === "timestamp") {
       const valid = timestampList.filter(isValidTs).length;
       const baseTime = valid;
-      return { frames: valid, size: `~${(valid * 0.4).toFixed(1)} MB`, time: `~${baseTime + 20} sec` };
+      return { frames: valid, size: estimateSize(valid), time: `~${baseTime + 20} sec` };
     }
     if (mode === "framecount") {
       const n = parseInt(frameCount, 10);
       if (isNaN(n) || n <= 0) return null;
       const baseTime = Math.ceil(n * 0.1);
-      return { frames: n, size: `~${(n * 0.4).toFixed(1)} MB`, time: `~${baseTime + 20} sec` };
+      return { frames: n, size: estimateSize(n), time: `~${baseTime + 20} sec` };
     }
     if (mode === "smart") {
       const baseTime = Math.ceil(span * 0.15);
       return { frames: "Auto", size: "Varies", time: `~${baseTime + 20} sec` };
     }
     return null;
-  }, [mode, interval, startTime, endTime, timestampList, frameCount, session.duration]);
+  }, [mode, interval, startTime, endTime, timestampList, frameCount, session.duration, format]);
 
   // ── Validate ────────────────────────────────────────────────────────────────
   function validate(): string | null {
@@ -310,6 +341,7 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
   const showIntervalHighFrameWarning = mode === "interval" && (estimatedFrames ?? 0) > 200;
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 md:p-6 flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
@@ -357,7 +389,7 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 font-medium">sec</span>
               </div>
               {showIntervalHighFrameWarning && (
-                <p className="text-[11px] text-amber-600">
+                <p className="text-[11px] text-muted-foreground">
                   Extracting too many frames can make the website unresponsive. Consider increasing the interval.
                 </p>
               )}
@@ -441,10 +473,9 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
                 className="font-mono bg-zinc-50 border-zinc-200 rounded-xl"
                 placeholder="10"
               />
-              <p className="text-[11px] text-zinc-400">Frames are distributed evenly across the timeline.</p>
               {showHighFrameWarning && (
-                <p className="text-[11px] text-amber-600">
-                  Extracting too many frames can make the website unresponsive. Consider using 200 or fewer frames.
+                <p className="text-[11px] text-muted-foreground">
+                  Extracting too many frames can make the website unresponsive. Consider increasing the interval.
                 </p>
               )}
             </div>
@@ -530,19 +561,33 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
           <p className="mt-3 text-sm text-red-600">{errorMessage}</p>
         )}
 
-        {/* ── Extract button ─────────────────────────────────────────────── */}
-        <Button
-          size="lg"
-          className="w-full mt-4 rounded-xl py-5 text-sm font-semibold bg-zinc-900 hover:bg-zinc-700 text-white shadow-sm transition-all duration-200 disabled:opacity-50"
-          onClick={handleExtract}
-          disabled={isExtracting || isInvalid}
-        >
-          {isExtracting ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Extracting…</>
-          ) : (
-            <><ScanLine className="w-4 h-4 mr-2" /> Start Extraction</>
+        {/* ── Extract / Stop buttons ──────────────────────────────────── */}
+        <div className={`mt-4 ${isExtracting ? "grid grid-cols-[1fr_auto] gap-2" : ""}`}>
+          <Button
+            size="lg"
+            className="w-full rounded-xl py-5 text-sm font-semibold bg-zinc-900 hover:bg-zinc-700 text-white shadow-sm transition-all duration-200 disabled:opacity-50"
+            onClick={handleExtract}
+            disabled={isExtracting || isInvalid}
+          >
+            {isExtracting ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Extracting…</>
+            ) : (
+              <><ScanLine className="w-4 h-4 mr-2" /> Start Extraction</>
+            )}
+          </Button>
+
+          {isExtracting && (
+            <Button
+              size="lg"
+              variant="outline"
+              className="rounded-xl py-5 px-4 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
+              onClick={() => abortRef.current?.abort()}
+              title="Stop extraction"
+            >
+              <Square className="w-4 h-4" />
+            </Button>
           )}
-        </Button>
+        </div>
 
         {isExtracting && (
           <div className="mt-3 space-y-1.5">
@@ -554,5 +599,6 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
         )}
       </Tabs>
     </div>
+    </TooltipProvider>
   );
 }
