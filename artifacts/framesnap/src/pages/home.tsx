@@ -1,19 +1,27 @@
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Header } from "@/components/layout-header";
 import { VideoUploader } from "@/components/video-uploader";
 import { VideoPreview } from "@/components/video-preview";
 import { ExtractionPanel } from "@/components/extraction-panel";
 import { FrameGallery } from "@/components/frame-gallery";
-import {
-  FeaturesSection,
-  HowItWorksSection,
-  UseCasesSection,
-  FAQSection,
-  Footer,
-} from "@/components/landing-sections";
 import { SeoHead } from "@/components/seo-head";
 import type { LocalSession, LocalFrame } from "@/lib/types";
+
+const FeaturesSection = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.FeaturesSection })),
+);
+const HowItWorksSection = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.HowItWorksSection })),
+);
+const UseCasesSection = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.UseCasesSection })),
+);
+const FAQSection = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.FAQSection })),
+);
+const Footer = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.Footer })),
+);
 
 export default function Home() {
   const [session, setSession] = useState<LocalSession | null>(null);
@@ -81,14 +89,8 @@ export default function Home() {
       />
 
       <main>
-        <AnimatePresence mode="wait" initial={false}>
-          {!session ? (
-            <motion.div
-              key="landing"
-              initial={false}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -10 }}
-            >
+        {!session ? (
+          <div>
               {/* ── Hero + Upload ─────────────────────────────────── */}
               <section
                 id="upload"
@@ -97,13 +99,11 @@ export default function Home() {
                 {/* Subtle grid background */}
                 <div
                   aria-hidden
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none hidden sm:block"
                   style={{
                     backgroundImage:
                       "linear-gradient(to right,#f1f1f1 1px,transparent 1px),linear-gradient(to bottom,#f1f1f1 1px,transparent 1px)",
                     backgroundSize: "40px 40px",
-                    maskImage:
-                      "radial-gradient(ellipse 80% 60% at 50% 0%,black 40%,transparent 100%)",
                   }}
                 />
 
@@ -132,29 +132,26 @@ export default function Home() {
               </section>
 
               {/* ── Landing Sections ──────────────────────────────── */}
-              <div className="cv-auto">
-                <FeaturesSection />
-              </div>
-              <div className="cv-auto">
-                <HowItWorksSection />
-              </div>
-              <div className="cv-auto">
-                <UseCasesSection />
-              </div>
-              <div className="cv-auto">
-                <FAQSection />
-              </div>
-              <div className="cv-auto">
-                <Footer />
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="workspace"
-              initial={false}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-12"
-            >
+              <Suspense fallback={null}>
+                <div className="cv-auto">
+                  <FeaturesSection />
+                </div>
+                <div className="cv-auto">
+                  <HowItWorksSection />
+                </div>
+                <div className="cv-auto">
+                  <UseCasesSection />
+                </div>
+                <div className="cv-auto">
+                  <FAQSection />
+                </div>
+                <div className="cv-auto">
+                  <Footer />
+                </div>
+              </Suspense>
+          </div>
+        ) : (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-12">
               {/* Back / breadcrumb */}
               <button
                 onClick={handleNewUpload}
@@ -222,9 +219,8 @@ export default function Home() {
                   </div>
                 </div>
               </footer>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
       </main>
     </div>
   );
