@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -112,4 +111,10 @@
 
 .mask-radial-fade {
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 70%, transparent 100%);
+}
+
+/* Improve first-screen paint by deferring below-the-fold section rendering. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 1100px;
 }

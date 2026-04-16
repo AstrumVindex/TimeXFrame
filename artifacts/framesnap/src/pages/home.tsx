@@ -85,7 +85,7 @@ export default function Home() {
           {!session ? (
             <motion.div
               key="landing"
-              initial={{ opacity: 0 }}
+              initial={false}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, y: -10 }}
             >
@@ -132,16 +132,26 @@ export default function Home() {
               </section>
 
               {/* ── Landing Sections ──────────────────────────────── */}
-              <FeaturesSection />
-              <HowItWorksSection />
-              <UseCasesSection />
-              <FAQSection />
-              <Footer />
+              <div className="cv-auto">
+                <FeaturesSection />
+              </div>
+              <div className="cv-auto">
+                <HowItWorksSection />
+              </div>
+              <div className="cv-auto">
+                <UseCasesSection />
+              </div>
+              <div className="cv-auto">
+                <FAQSection />
+              </div>
+              <div className="cv-auto">
+                <Footer />
+              </div>
             </motion.div>
           ) : (
             <motion.div
               key="workspace"
-              initial={{ opacity: 0, y: 16 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-12"
             >
