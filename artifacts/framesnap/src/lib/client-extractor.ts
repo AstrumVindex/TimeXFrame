@@ -2,6 +2,7 @@
 // Processes one frame at a time (sequential) to avoid RAM spikes on mobile.
 
 import type { LocalFrame } from "@/lib/types";
+import { createUuid } from "@/lib/uuid";
 
 /** Maximum canvas width on mobile devices to avoid GPU memory limits. */
 const MOBILE_MAX_WIDTH = 1280;
@@ -196,7 +197,7 @@ export async function extractFramesClient(
       await seekTo(video, ts);
       const blob = await captureFrame(video, canvas, ctx, opts);
       const blobUrl = URL.createObjectURL(blob);
-      const id = crypto.randomUUID();
+      const id = createUuid();
 
       const frame: LocalFrame = {
         id,

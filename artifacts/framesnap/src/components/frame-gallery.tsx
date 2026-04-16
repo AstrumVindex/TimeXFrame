@@ -51,9 +51,10 @@ interface LightboxProps {
   onNext?: () => void;
   currentIndex?: number;
   total?: number;
+  isMobile?: boolean;
 }
 
-function Lightbox({ frame, onClose, onPrev, onNext, currentIndex, total }: LightboxProps) {
+function Lightbox({ frame, onClose, onPrev, onNext, currentIndex, total, isMobile = false }: LightboxProps) {
   const hasPrev = !!onPrev && (currentIndex ?? 0) > 0;
   const hasNext = !!onNext && (currentIndex ?? 0) < (total ?? 1) - 1;
 
@@ -113,7 +114,11 @@ function Lightbox({ frame, onClose, onPrev, onNext, currentIndex, total }: Light
         {hasPrev && (
           <button
             onClick={(e) => { e.stopPropagation(); onPrev(); }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors"
+            className={[
+              "absolute top-1/2 -translate-y-1/2 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full",
+              "bg-black/55 md:bg-white/10 hover:bg-black/70 md:hover:bg-white/25 text-white transition-colors",
+              isMobile ? "left-2" : "left-0 md:-translate-x-14",
+            ].join(" ")}
             aria-label="Previous frame"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -124,7 +129,11 @@ function Lightbox({ frame, onClose, onPrev, onNext, currentIndex, total }: Light
         {hasNext && (
           <button
             onClick={(e) => { e.stopPropagation(); onNext(); }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/25 text-white transition-colors"
+            className={[
+              "absolute top-1/2 -translate-y-1/2 w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-full",
+              "bg-black/55 md:bg-white/10 hover:bg-black/70 md:hover:bg-white/25 text-white transition-colors",
+              isMobile ? "right-2" : "right-0 md:translate-x-14",
+            ].join(" ")}
             aria-label="Next frame"
           >
             <ChevronRight className="w-6 h-6" />
@@ -276,6 +285,7 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
       <Lightbox
         frame={previewFrame}
         onClose={() => setPreviewFrame(null)}
+        isMobile={isMobile}
         currentIndex={previewFrame ? visibleFrames.findIndex((f) => f.id === previewFrame.id) : 0}
         total={visibleFrames.length}
         onPrev={() => {

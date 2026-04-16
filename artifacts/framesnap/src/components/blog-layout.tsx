@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Search, Zap } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BlogFeedItem } from "@/components/blog-feed-item";
@@ -37,7 +37,7 @@ export const blogPosts: BlogPost[] = [
     category: "Engineering",
     title: "The Edge of the Browser: How Client-Side GPU Processing is Revolutionizing Video Tools",
     description:
-      "The days of upload-and-wait are over. Learn how TimexFrame uses client-side GPU-assisted decoding with WebAssembly-era browser APIs to deliver faster extraction, stronger privacy, and hybrid edge AI workflows.",
+      "The days of upload-and-wait are over. Learn how TimexFrame uses client-side GPU-assisted decoding with WebAssembly-era browser APIs to deliver local extraction, stronger privacy, and hybrid edge AI workflows.",
     date: "April 13, 2026",
     readingTime: 7,
     imageUrl: "/edge-browser-gpu.png",

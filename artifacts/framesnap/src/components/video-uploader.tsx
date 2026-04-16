@@ -5,6 +5,7 @@ import { UploadCloud, FileVideo, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { LocalSession } from "@/lib/types";
+import { createUuid } from "@/lib/uuid";
 
 interface VideoUploaderProps {
   onUploadSuccess: (session: LocalSession) => void;
@@ -12,6 +13,30 @@ interface VideoUploaderProps {
 }
 
 const MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024;
+const VIDEO_EXTENSIONS = new Set([
+  ".mp4",
+  ".mov",
+  ".webm",
+  ".m4v",
+  ".mkv",
+  ".avi",
+  ".mpg",
+  ".mpeg",
+  ".ogv",
+  ".3gp",
+]);
+
+function getLowercaseExtension(fileName: string): string {
+  const dotIndex = fileName.lastIndexOf(".");
+  if (dotIndex === -1) return "";
+  return fileName.slice(dotIndex).toLowerCase();
+}
+
+function isVideoFile(file: File): boolean {
+  const mime = file.type.toLowerCase();
+  if (mime.startsWith("video/")) return true;
+  return VIDEO_EXTENSIONS.has(getLowercaseExtension(file.name));
+}
 
 /**
  * Read video metadata locally using a hidden <video> element.
@@ -27,7 +52,7 @@ function readLocalMetadata(file: File): Promise<LocalSession> {
 
     video.addEventListener("loadedmetadata", () => {
       const session: LocalSession = {
-        sessionId: crypto.randomUUID(),
+        sessionId: createUuid(),
         filename: file.name,
         size: file.size,
         duration: video.duration,
@@ -58,6 +83,11 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
     if (!file) return;
     setErrorMessage(null);
 
+    if (!isVideoFile(file)) {
+      setErrorMessage("Please select a video file only.");
+      return;
+    }
+
     if (file.size > MAX_FILE_SIZE_BYTES) {
       setErrorMessage("Please select a video smaller than 500MB.");
       return;
@@ -77,21 +107,22 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
       const message =
         error instanceof Error
           ? error.message
-          : "Could not read this video. Please try again.";
+          : "Could not read this file as a video. Please try another file.";
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
     }
   }, [onFileSelect, onUploadSuccess]);
 
+  const onDropRejected = useCallback(() => {
+    setErrorMessage("Only video files are allowed.");
+  }, []);
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      "video/mp4": [".mp4"],
-      "video/quicktime": [".mov"],
-      "video/webm": [".webm"],
-    },
+    onDropRejected,
     maxFiles: 1,
+    multiple: false,
     disabled: isLoading,
   });
 
@@ -113,7 +144,12 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
           ${isLoading ? "pointer-events-none opacity-80" : "cursor-pointer"}
         `}
       >
-        <input {...getInputProps()} />
+        <input
+          {...getInputProps({
+            // Restrict native file picker to video entries (hide images/documents)
+            accept: "video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.mpg,.mpeg,.ogv,.3gp",
+          })}
+        />
 
         <div className="px-6 py-16 flex flex-col items-center justify-center text-center">
           <AnimatePresence mode="wait">
@@ -152,7 +188,7 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{actionText}</h3>
                 <p className="text-sm text-muted-foreground max-w-[260px] mx-auto mb-6">
-                  Supports MP4, MOV, and WEBM. Processed locally — no upload needed.
+                  Supports MP4, MOV, and WEBM. Processed locally on your device — no upload needed.
                 </p>
                 {!isMobile && (
                   <div className="px-6 py-2.5 rounded-full bg-white border shadow-sm text-sm font-medium text-foreground hover:shadow-md transition-shadow">

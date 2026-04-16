@@ -21,9 +21,9 @@ const CORE_VALUES = [
   },
   {
     icon: Zap,
-    title: "High Performance",
+    title: "Reliable Processing",
     description:
-      "TimexFrame leverages hardware-accelerated canvas rendering to decode and snapshot frames directly on your GPU. Hundreds of frames are extracted in seconds, not minutes.",
+      "TimexFrame leverages hardware-accelerated canvas rendering to decode and snapshot frames directly on your GPU. Performance depends on your device, browser, and video format.",
   },
   {
     icon: SlidersHorizontal,
@@ -38,7 +38,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
         title="About TimexFrame"
-        description="Learn what TimexFrame does and how it helps creators and teams extract high-quality frames from video instantly in the browser."
+        description="Learn what TimexFrame does and how it helps creators and teams extract high-quality frames from video in the browser."
         canonicalPath="/about"
         keywords={[
           "about TimexFrame",
@@ -64,21 +64,21 @@ export default function AboutPage() {
               </p>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 mb-6 leading-tight">
                 Our mission is to make video data{" "}
-                <span className="text-zinc-500">accessible and instant.</span>
+                <span className="text-zinc-500">accessible and dependable.</span>
               </h1>
               <p className="text-lg text-zinc-500 max-w-3xl leading-relaxed mb-4">
                 TimexFrame was built to eliminate the bottleneck between video content and
                 actionable still frames. Traditional tools demand large uploads, cloud queues,
-                and long wait times — we decided that was unacceptable.
+                and less control over media — we decided that was unacceptable.
               </p>
               <p className="text-lg text-zinc-500 max-w-3xl leading-relaxed mb-4">
-                By moving extraction entirely to the client, we unlocked Instant Client-Side
-                Extraction: frames are decoded, rendered, and ready to download inside your
+                By moving extraction entirely to the client, we unlocked local client-side
+                extraction: frames are decoded, rendered, and available to download inside your
                 browser without a single byte leaving your machine.
               </p>
               <p className="text-lg text-zinc-500 max-w-3xl leading-relaxed">
-                The result is a tool that is simultaneously private, fast, and precise — designed
-                for creators, researchers, and teams who need results now.
+                The result is a tool that is private, precise, and built for creators,
+                researchers, and teams who value control and quality.
               </p>
 
               <div className="mt-10 flex flex-wrap gap-3">

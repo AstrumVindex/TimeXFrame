@@ -65,7 +65,7 @@ export default function Home() {
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
         title="Free Video Frame Extractor Online"
-        description="Extract high-quality frames from MP4, MOV, and WEBM videos online. Use count, interval, or timestamp mode and download clean stills in seconds."
+        description="Extract high-quality frames from MP4, MOV, and WEBM videos online. Use count, interval, or timestamp mode and download clean stills."
         canonicalPath="/"
         keywords={[
           "free video frame extractor",
@@ -109,7 +109,7 @@ export default function Home() {
 
                 <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
                   <div className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-sm font-medium text-zinc-600 mb-8">
-                    ✨ The fastest way to extract frames — free &amp; no sign-up
+                    ✨ Extract frames locally — free &amp; no sign-up
                   </div>
 
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 mb-6 leading-[1.1]">
@@ -118,7 +118,7 @@ export default function Home() {
 
                   <p className="text-lg md:text-xl text-zinc-500 max-w-xl mx-auto mb-12">
                     Choose a video file to intelligently extract, select, and export
-                    high-quality frames in seconds.
+                    high-quality frames.
                   </p>
 
                   {/* File picker */}
@@ -201,7 +201,7 @@ export default function Home() {
               <footer className="border-t border-zinc-100 pt-6">
                 <div className="flex flex-col gap-3 text-center md:flex-row md:items-center md:justify-between">
                   <p className="text-xs text-zinc-400">
-                    © {new Date().getFullYear()} TimexFrame — Fast, free video frame extractor.
+                    © {new Date().getFullYear()} TimexFrame — Free video frame extractor.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-500">
                     <a href="/blog" className="hover:text-zinc-900 transition-colors">Blog</a>

@@ -28,8 +28,8 @@ const FEATURES = [
   },
   {
     icon: Zap,
-    title: "Fast Processing",
-    desc: "Powered by in-browser extraction, frames are processed locally in seconds without uploading your file.",
+    title: "Local Processing",
+    desc: "Powered by in-browser extraction, frames are processed on your device without uploading your file.",
   },
   {
     icon: PackageOpen,
@@ -104,7 +104,7 @@ const STEPS = [
   {
     icon: Download,
     step: "03",
-    title: "Download Frames Instantly",
+    title: "Download Your Frames",
     desc: "Browse the gallery, pick your favourites, and download individual frames or a bulk ZIP.",
   },
 ];
@@ -149,7 +149,7 @@ const USE_CASES = [
   {
     icon: Youtube,
     title: "YouTube Creators",
-    desc: "Find the perfect thumbnail from your video instantly — no need to screenshot manually.",
+    desc: "Find the perfect thumbnail from your video without manual screenshots.",
     keywords: "thumbnail extractor, frame from video for YouTube",
   },
   {
@@ -210,7 +210,7 @@ export function UseCasesSection() {
 const FAQS = [
   {
     q: "How do I extract frames from a video?",
-    a: "Select your video file, choose either a specific timestamp (hh:mm:ss) or an interval (every X seconds), then click Extract Frames. Your frames appear instantly in the gallery.",
+    a: "Select your video file, choose either a specific timestamp (hh:mm:ss) or an interval (every X seconds), then click Extract Frames. Your frames appear in the gallery once processing completes.",
   },
   {
     q: "Is this tool free?",
@@ -293,7 +293,7 @@ export function Footer() {
               TimexFrame
             </div>
             <p className="text-sm text-zinc-500 max-w-xs">
-              Fast, free video frame extraction for creators, students, and teams.
+              Free video frame extraction for creators, students, and teams.
             </p>
           </div>
 

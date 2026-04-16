@@ -495,7 +495,7 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
           {/* ── Smart ── */}
           <TabsContent value="smart" className="space-y-4 mt-0">
             <div className="rounded-xl bg-zinc-50 border border-zinc-200 p-4 text-xs text-zinc-500 leading-relaxed">
-              <span className="font-semibold text-zinc-700">Smart Extract</span> automatically selects the best frames based on your chosen filters. No heavy AI — just fast frame analysis.
+                <span className="font-semibold text-zinc-700">Smart Extract</span> automatically selects the best frames based on your chosen filters. No heavy AI — just focused frame analysis.
             </div>
 
             {[
