@@ -72,8 +72,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
-        title="Free Video Frame Extractor Online"
-        description="Extract high-quality frames from MP4, MOV, and WEBM videos online. Use count, interval, or timestamp mode and download clean stills."
+        title="Video Frame Extraction Tool | Free Video Frame Extractor Online"
+        description="Video frame extraction made simple. Extract high-quality frames from MP4, MOV, and WEBM using timestamp, interval, or frame count mode."
         canonicalPath="/"
         keywords={[
           "free video frame extractor",
@@ -112,8 +112,16 @@ export default function Home() {
                     ✨ Extract frames locally — free &amp; no sign-up
                   </div>
 
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 mb-6 leading-[1.1]">
-                    Extract perfection<br className="hidden sm:block" /> from motion.
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 mb-6 leading-[1.1]">
+                    <span className="sm:hidden">
+                      Video frame
+                      <br />
+                      extraction from motion.
+                    </span>
+                    <span className="hidden sm:inline">
+                      Video frame extraction
+                      <br className="hidden sm:block" /> from motion.
+                    </span>
                   </h1>
 
                   <p className="text-lg md:text-xl text-zinc-500 max-w-xl mx-auto mb-12">
