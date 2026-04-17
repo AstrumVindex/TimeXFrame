@@ -72,14 +72,23 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
-        title="Video Frame Extraction Tool | Free Video Frame Extractor Online"
-        description="Video frame extraction made simple. Extract high-quality frames from MP4, MOV, and WEBM using timestamp, interval, or frame count mode."
+        title="Video to Frames Converter | Free Video Frame Extractor Online"
+        description="Get frames from video instantly with a free video to frame image converter. Extract video frames from MP4, MOV, and WEBM using timestamp, interval, or frame-count mode."
         canonicalPath="/"
         keywords={[
-          "free video frame extractor",
-          "extract frames from video online",
+          "get frames from video",
+          "video to frame image converter",
+          "video to frames",
           "video to image converter",
-          "thumbnail frame extractor",
+          "video frame extractor",
+          "frame extractor from video",
+          "extract frames from video",
+          "extract video frames",
+          "export frames from video",
+          "video to image frames",
+          "video to image extractor online",
+          "mp4 extract frames",
+          "mp4 to frames",
         ]}
       />
       <Header
@@ -125,8 +134,8 @@ export default function Home() {
                   </h1>
 
                   <p className="text-lg md:text-xl text-zinc-500 max-w-xl mx-auto mb-12">
-                    Choose a video file to intelligently extract, select, and export
-                    high-quality frames.
+                    Use this free video to frames converter to get frames from video,
+                    select the best moments, and export high-quality image frames.
                   </p>
 
                   {/* File picker */}
@@ -135,6 +144,14 @@ export default function Home() {
                       onUploadSuccess={setSession}
                       onFileSelect={setLocalFile}
                     />
+                  </div>
+
+                  <div className="mt-8 max-w-2xl mx-auto text-center">
+                    <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">
+                      Works as a video frame extractor and frame extractor from video files.
+                      Convert MP4 to frames, export frames from video, or use it as a
+                      video to image extractor online without sign-up.
+                    </p>
                   </div>
                 </div>
               </section>
