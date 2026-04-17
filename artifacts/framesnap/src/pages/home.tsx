@@ -116,8 +116,8 @@ export default function Home() {
                   }}
                 />
 
-                <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 text-center">
-                  <div className="inline-flex items-center rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-sm font-medium text-zinc-600 mb-8">
+                <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24 text-center">
+                  <div className="hidden">
                     ✨ Extract frames locally — free &amp; no sign-up
                   </div>
 
