@@ -50,7 +50,7 @@ export const blogPosts: BlogPost[] = [
       "Why simple screenshots fail and how professional-grade client-side processing preserves the soul of your 4K footage. Learn GOP reconstruction, blur scoring, color fidelity, and privacy-first extraction workflows.",
     date: "April 12, 2026",
     readingTime: 9,
-    imageUrl: "https://picsum.photos/seed/masteringframe/800/450",
+    imageUrl: "/mastering-frame-high-resolution-extraction.png",
   },
   {
     slug: "4k-video-stills-guide",
