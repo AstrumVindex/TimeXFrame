@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/home"));
@@ -73,6 +74,7 @@ function App() {
             <Router />
           </Suspense>
         </WouterRouter>
+        <SpeedInsights />
       </TooltipProvider>
     </QueryClientProvider>
   );
