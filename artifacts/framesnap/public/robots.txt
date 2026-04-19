@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://timexframe-web.vercel.app/sitemap.xml
+Sitemap: https://www.timexframe.online/sitemap.xml

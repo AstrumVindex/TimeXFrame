@@ -40,7 +40,7 @@ export const blogPosts: BlogPost[] = [
       "Want to extract images from a video without losing quality? Learn the best methods and get perfect results using TimexFrame.",
     date: "April 19, 2026",
     readingTime: 6,
-    imageUrl: "https://picsum.photos/seed/how-to-extract-frames/800/450",
+    imageUrl: "/how-to-extract-frames-free-easy-guide.png",
   },
   {
     slug: "best-video-frame-extractor-tools-2026-guide",
@@ -50,7 +50,7 @@ export const blogPosts: BlogPost[] = [
       "Compare the top video frame extractor tools in 2026 and see why TimexFrame is the fastest privacy-first option.",
     date: "April 19, 2026",
     readingTime: 7,
-    imageUrl: "https://picsum.photos/seed/best-video-frame-extractor-tools/800/450",
+    imageUrl: "/best-video-frame-extractor-tools-2026-guide.png",
   },
   {
     slug: "how-to-extract-frames-without-losing-quality",
@@ -60,7 +60,7 @@ export const blogPosts: BlogPost[] = [
       "Step-by-step quality-first guide to extract frames from video without compression and keep original clarity.",
     date: "April 19, 2026",
     readingTime: 6,
-    imageUrl: "https://picsum.photos/seed/extract-without-quality-loss/800/450",
+    imageUrl: "/how-to-extract-frames-without-losing-quality.png",
   },
   {
     slug: "how-to-get-thumbnail-from-video-fast-free",
@@ -70,7 +70,7 @@ export const blogPosts: BlogPost[] = [
       "Step-by-step guide to extract a perfect thumbnail image from video with better quality and faster workflow.",
     date: "April 19, 2026",
     readingTime: 6,
-    imageUrl: "https://picsum.photos/seed/get-thumbnail-from-video/800/450",
+    imageUrl: "/how-to-get-thumbnail-from-video-fast-free.png",
   },
   {
     slug: "mp4-to-jpg-converter-free-online",
@@ -80,7 +80,7 @@ export const blogPosts: BlogPost[] = [
       "Convert MP4 to JPG online in a few clicks with fast extraction and clean image output.",
     date: "April 19, 2026",
     readingTime: 6,
-    imageUrl: "https://picsum.photos/seed/mp4-to-jpg-converter/800/450",
+    imageUrl: "/mp4-to-jpg-converter-free-online.png",
   },
   {
     slug: "the-edge-of-the-browser-client-side-gpu-processing",

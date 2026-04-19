@@ -1,12 +1,18 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Header } from "@/components/layout-header";
 import { VideoUploader } from "@/components/video-uploader";
-import { VideoPreview } from "@/components/video-preview";
-import { ExtractionPanel } from "@/components/extraction-panel";
-import { FrameGallery } from "@/components/frame-gallery";
 import { SeoHead } from "@/components/seo-head";
 import type { LocalSession, LocalFrame } from "@/lib/types";
 
+const VideoPreview = lazy(() =>
+  import("@/components/video-preview").then((m) => ({ default: m.VideoPreview })),
+);
+const ExtractionPanel = lazy(() =>
+  import("@/components/extraction-panel").then((m) => ({ default: m.ExtractionPanel })),
+);
+const FrameGallery = lazy(() =>
+  import("@/components/frame-gallery").then((m) => ({ default: m.FrameGallery })),
+);
 const FeaturesSection = lazy(() =>
   import("@/components/landing-sections").then((m) => ({ default: m.FeaturesSection })),
 );
@@ -30,6 +36,7 @@ export default function Home() {
   const [extractionVersion, setExtractionVersion] = useState(0);
   const [extractedFrames, setExtractedFrames] = useState<LocalFrame[]>([]);
   const [shouldScrollToUpload, setShouldScrollToUpload] = useState(false);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
   const [playheadTime, setPlayheadTime] = useState(0);
 
   const scrollToUpload = () => {
@@ -71,7 +78,7 @@ export default function Home() {
 
   useEffect(() => {
     const selector = 'meta[name="google-site-verification"]';
-    const content = "1Qb2CG362s5n_j9BiOT-iYuDC_AI3qj3ngLGwlV63OY";
+    const content = "9VhevVbu3KP_EwKVV0HWZfAfAXjtrNF1UPbghfj30fo";
 
     let meta = document.head.querySelector<HTMLMetaElement>(selector);
     const created = !meta;
@@ -90,6 +97,34 @@ export default function Home() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (session) return;
+
+    let timeoutId: number | null = null;
+    let idleId: number | null = null;
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    const enableDeferredSections = () => setShowDeferredSections(true);
+
+    if (typeof win.requestIdleCallback === "function") {
+      idleId = win.requestIdleCallback(enableDeferredSections, { timeout: 1200 });
+    } else {
+      timeoutId = window.setTimeout(enableDeferredSections, 700);
+    }
+
+    return () => {
+      if (idleId !== null && typeof win.cancelIdleCallback === "function") {
+        win.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [session]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
@@ -170,26 +205,29 @@ export default function Home() {
               </section>
 
               {/* ── Landing Sections ──────────────────────────────── */}
-              <Suspense fallback={null}>
-                <div className="cv-auto">
-                  <FeaturesSection />
-                </div>
-                <div className="cv-auto">
-                  <HowItWorksSection />
-                </div>
-                <div className="cv-auto">
-                  <UseCasesSection />
-                </div>
-                <div className="cv-auto">
-                  <FAQSection />
-                </div>
-                <div className="cv-auto">
-                  <Footer />
-                </div>
-              </Suspense>
+              {showDeferredSections ? (
+                <Suspense fallback={null}>
+                  <div className="cv-auto">
+                    <FeaturesSection />
+                  </div>
+                  <div className="cv-auto">
+                    <HowItWorksSection />
+                  </div>
+                  <div className="cv-auto">
+                    <UseCasesSection />
+                  </div>
+                  <div className="cv-auto">
+                    <FAQSection />
+                  </div>
+                  <div className="cv-auto">
+                    <Footer />
+                  </div>
+                </Suspense>
+              ) : null}
           </div>
         ) : (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-12">
+          <Suspense fallback={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-sm text-zinc-500">Loading workspace...</div>}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-12">
               {/* Back / breadcrumb */}
               <button
                 onClick={handleNewUpload}
@@ -259,7 +297,8 @@ export default function Home() {
                   </div>
                 </div>
               </footer>
-          </div>
+            </div>
+          </Suspense>
         )}
       </main>
     </div>

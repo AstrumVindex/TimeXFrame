@@ -48,12 +48,12 @@ export function BlogFeedItem({ post, isLast = false }: BlogFeedItemProps) {
       </h2>
 
       {/* 16:9 cover image */}
-      <Link href={href} tabIndex={-1} aria-hidden="true" className="block mb-6">
+      <Link href={href} className="block mb-6">
         <div className="aspect-video overflow-hidden rounded-lg">
           <img
             src={post.imageUrl}
-            alt=""
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+            alt={`${post.title} article cover image`}
+            className="h-full w-full object-contain bg-zinc-100 transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
             width={800}
             height={450}

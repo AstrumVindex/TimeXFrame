@@ -44,6 +44,12 @@ type BlogPost = {
 };
 
 const SITE_URL = typeof window !== "undefined" ? window.location.origin : "https://timexframe.app";
+const ARTICLE_SOCIAL_IMAGES: Record<string, string> = {
+  "best-video-frame-extractor-tools-2026-guide": "/best-video-frame-extractor-tools-2026-guide.png",
+  "how-to-extract-frames-without-losing-quality": "/how-to-extract-frames-without-losing-quality.png",
+  "how-to-get-thumbnail-from-video-fast-free": "/how-to-get-thumbnail-from-video-fast-free.png",
+  "mp4-to-jpg-converter-free-online": "/mp4-to-jpg-converter-free-online.png",
+};
 
 export const BLOG_POSTS: BlogPost[] = [
   {
@@ -1034,6 +1040,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
         description={post.seoDescription}
         canonicalPath={`/blog/${post.slug}`}
         type="article"
+        image={ARTICLE_SOCIAL_IMAGES[post.slug]}
         keywords={post.keywords}
         structuredData={[
           {

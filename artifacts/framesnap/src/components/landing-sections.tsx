@@ -62,7 +62,7 @@ export function FeaturesSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
             Powerful Frame Extraction Tools
           </h2>
-          <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-zinc-600 max-w-xl mx-auto">
             Everything you need to grab, review, and export frames from any video.
           </p>
         </div>
@@ -77,7 +77,7 @@ export function FeaturesSection() {
                 <Icon className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-zinc-900 mb-1.5">{title}</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
+              <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
@@ -130,7 +130,7 @@ export function HowItWorksSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
             Extract perfect video frames in a few simple steps
           </h2>
-          <p className="mt-4 text-lg text-zinc-500 max-w-3xl mx-auto">
+          <p className="mt-4 text-lg text-zinc-600 max-w-3xl mx-auto">
             Upload your video, choose how frames should be extracted, preview results, and download high-quality images - all processed locally on your device.
           </p>
         </div>
@@ -146,7 +146,7 @@ export function HowItWorksSection() {
                 <Icon className="w-7 h-7" />
               </div>
               <h3 className="font-semibold text-zinc-900 text-lg mb-2">{title}</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed max-w-xs">{desc}</p>
+              <p className="text-sm text-zinc-600 leading-relaxed max-w-xs">{desc}</p>
             </div>
           ))}
         </div>
@@ -191,7 +191,7 @@ export function UseCasesSection() {
         <div className="text-center mb-16">
           <p className="text-sm font-semibold uppercase tracking-widest text-zinc-600 mb-3">Use cases</p>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">Who Is This Tool For?</h2>
-          <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
+          <p className="mt-4 text-lg text-zinc-600 max-w-xl mx-auto">
             TimexFrame is built for anyone who works with video.
           </p>
         </div>
@@ -207,7 +207,7 @@ export function UseCasesSection() {
               </div>
               <div>
                 <h3 className="font-semibold text-zinc-900 mb-1">{title}</h3>
-                <p className="text-sm text-zinc-500 leading-relaxed">{desc}</p>
+                <p className="text-sm text-zinc-600 leading-relaxed">{desc}</p>
               </div>
             </div>
           ))}
