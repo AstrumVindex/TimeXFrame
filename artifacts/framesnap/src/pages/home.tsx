@@ -69,6 +69,28 @@ export default function Home() {
     });
   }, [shouldScrollToUpload, session]);
 
+  useEffect(() => {
+    const selector = 'meta[name="google-site-verification"]';
+    const content = "1Qb2CG362s5n_j9BiOT-iYuDC_AI3qj3ngLGwlV63OY";
+
+    let meta = document.head.querySelector<HTMLMetaElement>(selector);
+    const created = !meta;
+
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "google-site-verification");
+      document.head.appendChild(meta);
+    }
+
+    meta.setAttribute("content", content);
+
+    return () => {
+      if (created) {
+        meta?.remove();
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead

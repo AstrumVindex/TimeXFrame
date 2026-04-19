@@ -36,6 +36,10 @@ type BlogPost = {
         bullets?: string[];
       }>;
     };
+    codeBlock?: {
+      language?: string;
+      code: string;
+    };
   }>;
 };
 
@@ -495,7 +499,7 @@ const ACTIVE_BLOG_POSTS: BlogPost[] = [
       {
         heading: "Other Methods to Extract Frames",
         body:
-          "1) Using VLC Media Player\n• Open video in VLC\n• Pause at frame\n• Click Video -> Take Snapshot\nGood for single images, not ideal for multiple frames.\n\n2) Using FFmpeg (advanced users)\nffmpeg -i video.mp4 -vf fps=1 output_%04d.jpg\nExtracts one frame per second.\n\n3) Using video editing software\nTools like Premiere Pro and DaVinci Resolve allow frame export with high quality, but usually take more time.",
+          "1) Using VLC Media Player\n• Open video in VLC\n• Pause at frame\n• Click Video -> Take Snapshot\nGood for single images, not ideal for multiple frames.\n\n2) Using FFmpeg (advanced users)\nExtracts one frame per second.\n\n3) Using video editing software\nTools like Premiere Pro and DaVinci Resolve allow frame export with high quality, but usually take more time.",
       },
       {
         heading: "Why Use TimexFrame Instead?",
@@ -1151,6 +1155,11 @@ export function BlogPostPage({ slug }: { slug: string }) {
                   <p className="whitespace-pre-line text-base leading-relaxed text-zinc-600">
                     {section.body}
                   </p>
+                ) : null}
+                {section.codeBlock ? (
+                  <pre className="mt-4 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                    <code className="text-sm text-zinc-900">{section.codeBlock.code}</code>
+                  </pre>
                 ) : null}
                 {section.comparisonTable ? (
                   <div className="mt-2 overflow-hidden rounded-xl border border-zinc-200 bg-white text-zinc-900 shadow-sm">
