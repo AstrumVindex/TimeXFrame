@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight, CalendarDays, Clock3 } from "lucide-react";
 
-// ──── Public interface ────────────────────────────────────────────────────────
+// Public interface
 export interface FeedPost {
   slug: string;
   category: string;
@@ -18,16 +18,13 @@ interface BlogFeedItemProps {
 }
 
 /**
- * BlogFeedItem — anti-card document style.
+ * BlogFeedItem
  *
- * No borders, no backgrounds, no shadows.
- * Content sits directly on the page. Typography is the hero.
- *
- * Accessibility: WCAG 2.1 AA
- *   - Semantic <article> with aria-labelledby
- *   - Decorative image is aria-hidden
- *   - Keyboard-navigable links with visible focus rings
- *   - <time> with machine-readable dateTime
+ * Order requested:
+ * 1) Title
+ * 2) Image
+ * 3) Metadata
+ * 4) Description
  */
 export function BlogFeedItem({ post, isLast = false }: BlogFeedItemProps) {
   const href = `/blog/${post.slug}`;
@@ -37,6 +34,19 @@ export function BlogFeedItem({ post, isLast = false }: BlogFeedItemProps) {
       aria-labelledby={`post-title-${post.slug}`}
       className={`group py-12${!isLast ? " border-b border-zinc-100" : ""}`}
     >
+      {/* Title */}
+      <h2
+        id={`post-title-${post.slug}`}
+        className="mb-4 text-3xl font-bold tracking-tight text-zinc-900 leading-tight md:text-4xl"
+      >
+        <Link
+          href={href}
+          className="rounded transition-colors hover:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+        >
+          {post.title}
+        </Link>
+      </h2>
+
       {/* 16:9 cover image */}
       <Link href={href} tabIndex={-1} aria-hidden="true" className="block mb-6">
         <div className="aspect-video overflow-hidden rounded-lg">
@@ -54,30 +64,17 @@ export function BlogFeedItem({ post, isLast = false }: BlogFeedItemProps) {
       {/* Metadata row */}
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-zinc-500">
         <span className="font-semibold text-zinc-700">{post.category}</span>
-        <span aria-hidden="true">·</span>
+        <span aria-hidden="true">&middot;</span>
         <span className="inline-flex items-center gap-1.5">
           <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
           <time dateTime={post.date}>{post.date}</time>
         </span>
-        <span aria-hidden="true">·</span>
+        <span aria-hidden="true">&middot;</span>
         <span className="inline-flex items-center gap-1.5">
           <Clock3 className="h-3.5 w-3.5" aria-hidden="true" />
           {post.readingTime} min read
         </span>
       </div>
-
-      {/* Title */}
-      <h2
-        id={`post-title-${post.slug}`}
-        className="mb-4 text-3xl font-bold tracking-tight text-zinc-900 leading-tight md:text-4xl"
-      >
-        <Link
-          href={href}
-          className="rounded transition-colors hover:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
-        >
-          {post.title}
-        </Link>
-      </h2>
 
       {/* Excerpt */}
       <p className="max-w-[65ch] text-base leading-relaxed text-zinc-700">

@@ -117,25 +117,12 @@ export default function Home() {
                 />
 
                 <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-24 text-center">
-                  <div className="hidden">
-                    ✨ Extract frames locally — free &amp; no sign-up
-                  </div>
-
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-zinc-900 mb-6 leading-[1.1]">
-                    <span className="sm:hidden">
-                      Video frame
-                      <br />
-                      extraction from motion.
-                    </span>
-                    <span className="hidden sm:inline">
-                      Video frame extraction
-                      <br className="hidden sm:block" /> from motion.
-                    </span>
+                    Extract Perfect Frames from Any Video - Instantly
                   </h1>
 
-                  <p className="text-lg md:text-xl text-zinc-500 max-w-xl mx-auto mb-12">
-                    Use this free video to frames converter to get frames from video,
-                    select the best moments, and export high-quality image frames.
+                  <p className="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto mb-12">
+                    Upload your video, pick the best moment, and download high-quality frames. No upload. No login. Everything runs on your device.
                   </p>
 
                   {/* File picker */}
@@ -146,12 +133,16 @@ export default function Home() {
                     />
                   </div>
 
-                  <div className="mt-8 max-w-2xl mx-auto text-center">
-                    <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">
-                      Works as a video frame extractor and frame extractor from video files.
-                      Convert MP4 to frames, export frames from video, or use it as a
-                      video to image extractor online without sign-up.
-                    </p>
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-700">
+                      No upload required - processed locally
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-700">
+                      Supports MP4, MOV, WEBM
+                    </span>
+                    <span className="inline-flex items-center rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-700">
+                      Free &amp; fast extraction
+                    </span>
                   </div>
                 </div>
               </section>
@@ -241,6 +232,8 @@ export default function Home() {
                     <a href="/contact" className="hover:text-zinc-900 transition-colors">Contact</a>
                     <a href="/privacy" className="hover:text-zinc-900 transition-colors">Privacy</a>
                     <a href="/terms" className="hover:text-zinc-900 transition-colors">Terms</a>
+                    <a href="/disclaimer" className="hover:text-zinc-900 transition-colors">Disclaimer</a>
+                    <a href="/dmca" className="hover:text-zinc-900 transition-colors">DMCA</a>
                   </div>
                 </div>
               </footer>

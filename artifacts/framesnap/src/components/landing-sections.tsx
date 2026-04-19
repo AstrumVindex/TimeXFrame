@@ -58,7 +58,7 @@ export function FeaturesSection() {
     <section id="features" className="py-24 bg-zinc-50 border-t border-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">What you get</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-600 mb-3">What you get</p>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
             Powerful Frame Extraction Tools
           </h2>
@@ -92,20 +92,32 @@ const STEPS = [
   {
     icon: Upload,
     step: "01",
-    title: "Select Your Video",
-    desc: "Drag and drop or click to choose any MP4, MOV, or WEBM video from your device.",
+    title: "Upload Your Video",
+    desc: "Drag and drop or browse to select an MP4, MOV, or WEBM video from your device.",
   },
   {
     icon: SlidersHorizontal,
     step: "02",
-    title: "Select Frame Options",
-    desc: "Choose a specific timestamp or extract frames at a regular interval. Original frame quality is preserved automatically.",
+    title: "Choose Extraction Method",
+    desc: "Select Interval, Timestamp, Count, or Smart Extract based on how you want frames extracted.",
+  },
+  {
+    icon: Zap,
+    step: "03",
+    title: "Start Extraction",
+    desc: "Click extract to process frames locally on your device with no upload required.",
+  },
+  {
+    icon: Crosshair,
+    step: "04",
+    title: "Preview and Select Frames",
+    desc: "Review extracted frames in the gallery and pick the exact moments you want to keep.",
   },
   {
     icon: Download,
-    step: "03",
+    step: "05",
     title: "Download Your Frames",
-    desc: "Browse the gallery, pick your favourites, and download individual frames or a bulk ZIP.",
+    desc: "Download a single frame or export selected frames together as a ZIP file.",
   },
 ];
 
@@ -114,18 +126,18 @@ export function HowItWorksSection() {
     <section id="how-it-works" className="py-24 bg-white border-t border-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">Simple process</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-600 mb-3">Simple process</p>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
-            How to Extract Frames in 3 Steps
+            Extract perfect video frames in a few simple steps
           </h2>
-          <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
-            No sign-up, no software — just pick a file and go.
+          <p className="mt-4 text-lg text-zinc-500 max-w-3xl mx-auto">
+            Upload your video, choose how frames should be extracted, preview results, and download high-quality images - all processed locally on your device.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 relative">
           {/* connector line */}
-          <div className="hidden md:block absolute top-10 left-1/6 right-1/6 h-px bg-zinc-100 z-0" />
+          <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px bg-zinc-100 z-0" />
 
           {STEPS.map(({ icon: Icon, step, title, desc }) => (
             <div key={step} className="relative flex flex-col items-center text-center">
@@ -177,7 +189,7 @@ export function UseCasesSection() {
     <section id="use-cases" className="py-24 bg-zinc-50 border-t border-zinc-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">Use cases</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-600 mb-3">Use cases</p>
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">Who Is This Tool For?</h2>
           <p className="mt-4 text-lg text-zinc-500 max-w-xl mx-auto">
             TimexFrame is built for anyone who works with video.
@@ -210,36 +222,45 @@ export function UseCasesSection() {
 const FAQS = [
   {
     q: "How do I extract frames from a video?",
-    a: "Select your video file, choose either a specific timestamp (hh:mm:ss) or an interval (every X seconds), then click Extract Frames. Your frames appear in the gallery once processing completes.",
+    a: "You can extract frames from video by uploading your video, selecting an extraction method (interval, timestamp, count, or Smart Extract), and clicking Start Extraction. Once processing starts, you can preview and download the frames.",
   },
   {
-    q: "Is this tool free?",
-    a: "Yes — TimexFrame is completely free to use with no account required.",
+    q: "Is this video frame extractor free to use?",
+    a: "Yes, TimexFrame is completely free to use. You can extract and download frames without any subscription or hidden charges in this video frame extractor online tool.",
+  },
+  {
+    q: "Does this tool upload my video to a server?",
+    a: "No. Your video is processed locally in your browser. This means your files never leave your device, ensuring complete privacy and security while you extract frames from video.",
   },
   {
     q: "What video formats are supported?",
-    a: "MP4, MOV, and WEBM formats are supported. Files are processed locally in your browser.",
+    a: "TimexFrame supports popular formats including MP4, MOV, and WEBM. These formats work directly in modern browsers without additional software for video frame extraction.",
   },
   {
     q: "Does frame extraction reduce image quality?",
-    a: "No. Frames are extracted directly from the video stream at full resolution, so quality is preserved.",
+    a: "No. Frames are extracted at the original video resolution and quality. Unlike screenshots, this extract frames from video workflow preserves sharpness and color accuracy.",
   },
   {
-    q: "Is my video safe and private?",
-    a: "Your video stays on your device during extraction. Frames are generated locally in your browser and are not uploaded.",
-  },
-  {
-    q: "What are Smart Suggestions?",
-    a: "TimexFrame automatically analyses each frame for sharpness and brightness. Frames that score well are marked with a ✨ Suggested badge so you can quickly find the best ones.",
+    q: "What is Smart Extract and how does it work?",
+    a: "Smart Extract automatically selects the best frames based on clarity and visual quality. It analyzes frames to find sharp and well-lit moments, helping you save time without manual selection in a video frame extractor online workflow.",
   },
 ];
 
-function FAQItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
+function FAQItem({
+  q,
+  a,
+  open,
+  onToggle,
+}: {
+  q: string;
+  a: string;
+  open: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="border border-zinc-100 rounded-xl overflow-hidden bg-white">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-zinc-50 transition-colors"
       >
         <span className="font-medium text-zinc-900 pr-4">{q}</span>
@@ -249,26 +270,45 @@ function FAQItem({ q, a }: { q: string; a: string }) {
           <ChevronDown className="w-4 h-4 text-zinc-400 flex-shrink-0" />
         )}
       </button>
-      {open && (
-        <div className="px-5 pb-4 text-sm text-zinc-500 leading-relaxed border-t border-zinc-100 pt-3">
-          {a}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div
+            className={`px-5 pb-4 pt-3 text-sm text-zinc-500 leading-relaxed border-t border-zinc-100 transition-all duration-300 ease-out ${
+              open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+            }`}
+          >
+            {a}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   return (
     <section id="faq" className="py-24 bg-white border-t border-zinc-100">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-3">Got questions?</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">Frequently Asked Questions</h2>
+          <p className="text-sm font-semibold uppercase tracking-widest text-zinc-600 mb-3">Frequently Asked Questions About Frame Extraction</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">FAQs</h2>
         </div>
         <div className="space-y-3">
-          {FAQS.map((faq) => (
-            <FAQItem key={faq.q} {...faq} />
+          {FAQS.map((faq, index) => (
+            <FAQItem
+              key={faq.q}
+              {...faq}
+              open={openIndex === index}
+              onToggle={() => {
+                setOpenIndex((current) => (current === index ? null : index));
+              }}
+            />
           ))}
         </div>
       </div>
@@ -321,6 +361,8 @@ export function Footer() {
               <Link href="/privacy" className="block hover:text-zinc-900 transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="block hover:text-zinc-900 transition-colors">Terms of Use</Link>
               <Link href="/cookies" className="block hover:text-zinc-900 transition-colors">Cookie Policy</Link>
+              <Link href="/disclaimer" className="block hover:text-zinc-900 transition-colors">Disclaimer</Link>
+              <Link href="/dmca" className="block hover:text-zinc-900 transition-colors">DMCA Policy</Link>
             </nav>
           </div>
         </div>

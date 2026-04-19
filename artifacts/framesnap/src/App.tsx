@@ -58,6 +58,8 @@ function Router() {
       <Route path="/privacy">{() => <LegalPage variant="privacy" />}</Route>
       <Route path="/terms">{() => <LegalPage variant="terms" />}</Route>
       <Route path="/cookies">{() => <LegalPage variant="cookies" />}</Route>
+      <Route path="/disclaimer">{() => <LegalPage variant="disclaimer" />}</Route>
+      <Route path="/dmca">{() => <LegalPage variant="dmca" />}</Route>
       <Route component={NotFound} />
     </Switch>
   );

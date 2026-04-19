@@ -33,6 +33,56 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    slug: "how-to-extract-frames-from-video-free-guide",
+    category: "Guide",
+    title: "How to Extract Frames from Video (Free & Easy Guide)",
+    description:
+      "Want to extract images from a video without losing quality? Learn the best methods and get perfect results using TimexFrame.",
+    date: "April 19, 2026",
+    readingTime: 6,
+    imageUrl: "https://picsum.photos/seed/how-to-extract-frames/800/450",
+  },
+  {
+    slug: "best-video-frame-extractor-tools-2026-guide",
+    category: "Comparison",
+    title: "Best Video Frame Extractor Tools (Free & Online) | 2026 Guide",
+    description:
+      "Compare the top video frame extractor tools in 2026 and see why TimexFrame is the fastest privacy-first option.",
+    date: "April 19, 2026",
+    readingTime: 7,
+    imageUrl: "https://picsum.photos/seed/best-video-frame-extractor-tools/800/450",
+  },
+  {
+    slug: "how-to-extract-frames-without-losing-quality",
+    category: "Guide",
+    title: "How to Extract Frames Without Losing Quality",
+    description:
+      "Step-by-step quality-first guide to extract frames from video without compression and keep original clarity.",
+    date: "April 19, 2026",
+    readingTime: 6,
+    imageUrl: "https://picsum.photos/seed/extract-without-quality-loss/800/450",
+  },
+  {
+    slug: "how-to-get-thumbnail-from-video-fast-free",
+    category: "Guide",
+    title: "How to Get Thumbnail from Video (Fast & Free) | TimexFrame",
+    description:
+      "Step-by-step guide to extract a perfect thumbnail image from video with better quality and faster workflow.",
+    date: "April 19, 2026",
+    readingTime: 6,
+    imageUrl: "https://picsum.photos/seed/get-thumbnail-from-video/800/450",
+  },
+  {
+    slug: "mp4-to-jpg-converter-free-online",
+    category: "Guide",
+    title: "MP4 to JPG Converter (Free & Online) | TimexFrame",
+    description:
+      "Convert MP4 to JPG online in a few clicks with fast extraction and clean image output.",
+    date: "April 19, 2026",
+    readingTime: 6,
+    imageUrl: "https://picsum.photos/seed/mp4-to-jpg-converter/800/450",
+  },
+  {
     slug: "the-edge-of-the-browser-client-side-gpu-processing",
     category: "Engineering",
     title: "The Edge of the Browser: How Client-Side GPU Processing is Revolutionizing Video Tools",
@@ -103,8 +153,16 @@ export const blogPosts: BlogPost[] = [
  */
 export function BlogLayout() {
   const [query, setQuery] = useState("");
+  const publishedPosts = blogPosts.filter(
+    (post) =>
+      post.slug === "how-to-extract-frames-from-video-free-guide" ||
+      post.slug === "best-video-frame-extractor-tools-2026-guide" ||
+      post.slug === "how-to-extract-frames-without-losing-quality" ||
+      post.slug === "how-to-get-thumbnail-from-video-fast-free" ||
+      post.slug === "mp4-to-jpg-converter-free-online",
+  );
 
-  const filtered: FeedPost[] = blogPosts.filter((post) => {
+  const filtered: FeedPost[] = publishedPosts.filter((post) => {
     const q = query.trim().toLowerCase();
     const matchesQuery =
       q === "" ||
