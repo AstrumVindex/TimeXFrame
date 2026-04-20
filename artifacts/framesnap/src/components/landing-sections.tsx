@@ -332,14 +332,14 @@ export function Footer() {
               </div>
               TimexFrame
             </div>
-            <p className="text-sm text-zinc-500 max-w-xs">
+            <p className="text-sm text-zinc-600 max-w-xs">
               Free video frame extraction for creators, students, and teams.
             </p>
           </div>
 
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Product</h3>
-            <nav className="space-y-2 text-sm text-zinc-500">
+            <nav className="space-y-2 text-sm text-zinc-600">
               <a href={`${baseUrl}#features`} className="block hover:text-zinc-900 transition-colors">Features</a>
               <a href={`${baseUrl}#how-it-works`} className="block hover:text-zinc-900 transition-colors">How It Works</a>
               <a href={`${baseUrl}#faq`} className="block hover:text-zinc-900 transition-colors">FAQ</a>
@@ -348,7 +348,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Resources</h3>
-            <nav className="space-y-2 text-sm text-zinc-500">
+            <nav className="space-y-2 text-sm text-zinc-600">
               <Link href="/blog" className="block hover:text-zinc-900 transition-colors">Blog</Link>
               <Link href="/about" className="block hover:text-zinc-900 transition-colors">About Us</Link>
               <Link href="/contact" className="block hover:text-zinc-900 transition-colors">Contact</Link>
@@ -357,7 +357,7 @@ export function Footer() {
 
           <div>
             <h3 className="text-sm font-semibold text-zinc-900 mb-3">Legal</h3>
-            <nav className="space-y-2 text-sm text-zinc-500">
+            <nav className="space-y-2 text-sm text-zinc-600">
               <Link href="/privacy" className="block hover:text-zinc-900 transition-colors">Privacy Policy</Link>
               <Link href="/terms" className="block hover:text-zinc-900 transition-colors">Terms of Use</Link>
               <Link href="/cookies" className="block hover:text-zinc-900 transition-colors">Cookie Policy</Link>
@@ -367,7 +367,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-zinc-200 pt-4 text-xs text-zinc-400">
+        <div className="mt-8 border-t border-zinc-200 pt-4 text-xs text-zinc-600">
           © {new Date().getFullYear()} TimexFrame. All rights reserved.
         </div>
       </div>

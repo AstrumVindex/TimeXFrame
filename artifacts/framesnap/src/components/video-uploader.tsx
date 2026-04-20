@@ -179,9 +179,13 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
           {...getInputProps({
             // Restrict native file picker to video entries (hide images/documents)
             accept: "video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.mpg,.mpeg,.ogv,.3gp",
+            "aria-label": "Select a video file to extract frames",
             "aria-describedby": helperId,
           })}
         />
+        <label htmlFor={inputId} className="sr-only">
+          Select a video file to extract frames
+        </label>
         <p id={helperId} className="sr-only">
           Drop your video here, or press Enter or Space to browse files.
           Supports MP4, MOV, and WEBM. Processed locally on your device.
@@ -200,7 +204,7 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Reading video...</h3>
+                <h2 className="text-xl font-semibold mb-2">Reading video...</h2>
                 <p className="text-sm text-muted-foreground mb-6">
                   Reading metadata locally - nothing leaves your device.
                 </p>
@@ -222,9 +226,9 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 >
                   {isDragActive ? <UploadCloud className="w-8 h-8" /> : <FileVideo className="w-8 h-8" />}
                 </div>
-                <h3 id={titleId} className="text-2xl font-semibold mb-2 text-zinc-900">
+                <h2 id={titleId} className="text-2xl font-semibold mb-2 text-zinc-900">
                   Drop your video here
-                </h3>
+                </h2>
                 <p className="text-sm text-zinc-600 mb-1">or click to browse files</p>
                 {!isMobile ? (
                   <label

@@ -77,28 +77,6 @@ export default function Home() {
   }, [shouldScrollToUpload, session]);
 
   useEffect(() => {
-    const selector = 'meta[name="google-site-verification"]';
-    const content = "9VhevVbu3KP_EwKVV0HWZfAfAXjtrNF1UPbghfj30fo";
-
-    let meta = document.head.querySelector<HTMLMetaElement>(selector);
-    const created = !meta;
-
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "google-site-verification");
-      document.head.appendChild(meta);
-    }
-
-    meta.setAttribute("content", content);
-
-    return () => {
-      if (created) {
-        meta?.remove();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (session) return;
 
     let timeoutId: number | null = null;
@@ -109,14 +87,22 @@ export default function Home() {
     };
 
     const enableDeferredSections = () => setShowDeferredSections(true);
+    const schedule = () => {
+      if (typeof win.requestIdleCallback === "function") {
+        idleId = win.requestIdleCallback(enableDeferredSections, { timeout: 1800 });
+      } else {
+        timeoutId = window.setTimeout(enableDeferredSections, 1200);
+      }
+    };
 
-    if (typeof win.requestIdleCallback === "function") {
-      idleId = win.requestIdleCallback(enableDeferredSections, { timeout: 1200 });
+    if (document.readyState === "complete") {
+      schedule();
     } else {
-      timeoutId = window.setTimeout(enableDeferredSections, 700);
+      window.addEventListener("load", schedule, { once: true });
     }
 
     return () => {
+      window.removeEventListener("load", schedule);
       if (idleId !== null && typeof win.cancelIdleCallback === "function") {
         win.cancelIdleCallback(idleId);
       }

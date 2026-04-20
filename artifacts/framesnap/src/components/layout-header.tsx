@@ -42,19 +42,19 @@ export function Header({ onExtractClick, isWorkspace, onNewUpload }: HeaderProps
           <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
             <Link
               href="/blog"
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              className="text-sm font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
             >
               Blog
             </Link>
             <Link
               href="/about"
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              className="text-sm font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
             >
               About Us
             </Link>
             <Link
               href="/contact"
-              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              className="text-sm font-medium text-zinc-700 hover:text-zinc-900 transition-colors"
             >
               Contact
             </Link>
