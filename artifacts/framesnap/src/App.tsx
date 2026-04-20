@@ -1,7 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
 const Home = lazy(() => import("@/pages/home"));
@@ -12,15 +10,6 @@ const BlogPage = lazy(() => import("@/pages/blog"));
 const BlogPostPage = lazy(() =>
   import("@/pages/blog").then((module) => ({ default: module.BlogPostPage })),
 );
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 function ScrollManager() {
   const [location] = useLocation();
@@ -41,7 +30,7 @@ function ScrollManager() {
       }
     }
 
-    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [location]);
 
   return null;
@@ -67,16 +56,12 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <ScrollManager />
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
-            <Router />
-          </Suspense>
-        </WouterRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+      <ScrollManager />
+      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+        <Router />
+      </Suspense>
+    </WouterRouter>
   );
 }
 

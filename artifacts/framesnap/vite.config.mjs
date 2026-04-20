@@ -53,6 +53,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(rootDir, "dist/public"),
     emptyOutDir: true,
+    modulePreload: false,
   },
   server: {
     port,

@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { LocalFrame } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -336,24 +335,19 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
 
       {/* Frame grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-        <AnimatePresence>
-          {visibleFrames.map((frame) => {
-            const isSelected = selectedIds.has(frame.id);
-            return (
-              <motion.div
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.85 }}
-                key={frame.id}
-                className={`
+        {visibleFrames.map((frame) => {
+          const isSelected = selectedIds.has(frame.id);
+          return (
+            <div
+              key={frame.id}
+              className={`
                   group relative rounded-xl overflow-hidden aspect-video border transition-all duration-300
                   ${isSelected
                     ? "ring-4 ring-primary border-primary shadow-md"
                     : "border-border shadow-sm hover:shadow-md hover:border-zinc-300 bg-zinc-100"
                   }
                 `}
-              >
+            >
                 <img
                   src={frame.url}
                   alt={`Frame at ${formatTime(frame.timestamp)}`}
@@ -417,10 +411,9 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
                 <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-xs font-mono font-medium z-10 pointer-events-none">
                   {formatTime(frame.timestamp)}
                 </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
 
       {visibleFrames.length === 0 && (
@@ -430,14 +423,8 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
       )}
 
       {/* Floating Action Bar */}
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ y: 100, opacity: 0, scale: 0.95 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 100, opacity: 0, scale: 0.95 }}
-            className="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] sm:w-auto max-w-2xl bg-zinc-900 text-white px-3 sm:px-6 py-2.5 sm:py-4 rounded-2xl sm:rounded-full shadow-2xl flex items-center justify-between sm:justify-start gap-2 sm:gap-4 z-50 ring-1 ring-white/10"
-          >
+      {selectedIds.size > 0 && (
+          <div className="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-1rem)] sm:w-auto max-w-2xl bg-zinc-900 text-white px-3 sm:px-6 py-2.5 sm:py-4 rounded-2xl sm:rounded-full shadow-2xl flex items-center justify-between sm:justify-start gap-2 sm:gap-4 z-50 ring-1 ring-white/10">
             <span className="font-semibold text-xs sm:text-sm whitespace-nowrap">{selectedIds.size} selected</span>
             <div className="w-px h-5 bg-zinc-700 hidden sm:block" />
 
@@ -468,9 +455,8 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
               {isZipping ? <Loader2 className="w-4 h-4 sm:mr-1.5 animate-spin" /> : <Download className="w-4 h-4 sm:mr-1.5" />}
               Download ZIP
             </Button>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }

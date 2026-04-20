@@ -1,6 +1,4 @@
-import { useCallback, useId, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useId, useRef, useState } from "react";
 import { UploadCloud, FileVideo, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -75,14 +73,15 @@ function readLocalMetadata(file: File): Promise<LocalSession> {
 export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderProps) {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isMobile = useIsMobile();
+  const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const helperId = useId();
   const titleId = useId();
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
+  const processFile = useCallback(async (file: File | null | undefined) => {
     if (!file) return;
     setErrorMessage(null);
 
@@ -117,54 +116,64 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
     }
   }, [onFileSelect, onUploadSuccess]);
 
-  const onDropRejected = useCallback(() => {
-    setErrorMessage("Only video files are allowed.");
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
-    onDrop,
-    onDropRejected,
-    maxFiles: 1,
-    multiple: false,
-    disabled: isLoading,
-    noClick: true,
-    noKeyboard: true,
-  });
+  const openFilePicker = useCallback(() => {
+    if (!isLoading) inputRef.current?.click();
+  }, [isLoading]);
 
   return (
     <div className="w-full">
       <div
-        {...getRootProps({
-          role: "button",
-          tabIndex: isLoading ? -1 : 0,
-          "aria-label": "Upload video",
-          "aria-labelledby": titleId,
-          "aria-describedby": helperId,
-          "aria-keyshortcuts": "Enter Space",
-          onClick: () => {
-            if (!isLoading) open();
-          },
-          onKeyDown: (event) => {
-            if (isLoading) return;
-            const key = event.key;
-            if (key === " " || key === "Spacebar" || key === "Space") {
-              event.preventDefault();
-              return;
-            }
-            if (key === "Enter" || key === "NumpadEnter") {
-              event.preventDefault();
-              open();
-            }
-          },
-          onKeyUp: (event) => {
-            if (isLoading) return;
-            const key = event.key;
-            if (key === " " || key === "Spacebar" || key === "Space") {
-              event.preventDefault();
-              open();
-            }
-          },
-        })}
+        role="button"
+        tabIndex={isLoading ? -1 : 0}
+        aria-label="Upload video"
+        aria-labelledby={titleId}
+        aria-describedby={helperId}
+        aria-keyshortcuts="Enter Space"
+        onClick={openFilePicker}
+        onKeyDown={(event) => {
+          if (isLoading) return;
+          const key = event.key;
+          if (key === " " || key === "Spacebar" || key === "Space") {
+            event.preventDefault();
+            return;
+          }
+          if (key === "Enter" || key === "NumpadEnter") {
+            event.preventDefault();
+            openFilePicker();
+          }
+        }}
+        onKeyUp={(event) => {
+          if (isLoading) return;
+          const key = event.key;
+          if (key === " " || key === "Spacebar" || key === "Space") {
+            event.preventDefault();
+            openFilePicker();
+          }
+        }}
+        onDragEnter={(event) => {
+          if (isLoading) return;
+          event.preventDefault();
+          setIsDragActive(true);
+        }}
+        onDragOver={(event) => {
+          if (isLoading) return;
+          event.preventDefault();
+          if (!isDragActive) setIsDragActive(true);
+        }}
+        onDragLeave={(event) => {
+          if (isLoading) return;
+          event.preventDefault();
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+            setIsDragActive(false);
+          }
+        }}
+        onDrop={(event) => {
+          if (isLoading) return;
+          event.preventDefault();
+          setIsDragActive(false);
+          const file = event.dataTransfer.files?.[0];
+          void processFile(file);
+        }}
         className={`
           relative flex flex-col items-center justify-center p-10 rounded-2xl border-2 border-dashed transition-all duration-200
           md:rounded-[2rem] md:p-16
@@ -175,13 +184,18 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
         `}
       >
         <input
+          ref={inputRef}
           id={inputId}
-          {...getInputProps({
-            // Restrict native file picker to video entries (hide images/documents)
-            accept: "video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.mpg,.mpeg,.ogv,.3gp",
-            "aria-label": "Select a video file to extract frames",
-            "aria-describedby": helperId,
-          })}
+          type="file"
+          accept="video/*,.mp4,.mov,.webm,.m4v,.mkv,.avi,.mpg,.mpeg,.ogv,.3gp"
+          aria-label="Select a video file to extract frames"
+          aria-describedby={helperId}
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            void processFile(file);
+            event.currentTarget.value = "";
+          }}
         />
         <label htmlFor={inputId} className="sr-only">
           Select a video file to extract frames
@@ -192,15 +206,8 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
         </p>
 
         <div className="px-6 py-16 flex flex-col items-center justify-center text-center">
-          <AnimatePresence mode="wait">
-            {isLoading ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center max-w-sm w-full"
-              >
+          {isLoading ? (
+            <div className="flex flex-col items-center max-w-sm w-full">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
@@ -209,15 +216,9 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                   Reading metadata locally - nothing leaves your device.
                 </p>
                 <Progress value={progress} className="h-2 w-full" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="idle"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex flex-col items-center"
-              >
+            </div>
+          ) : (
+            <div className="flex flex-col items-center">
                 <div
                   className={`
                   w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-colors duration-300
@@ -238,9 +239,8 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                     Browse Files
                   </label>
                 ) : null}
-              </motion.div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
         </div>
       </div>
       {errorMessage && (
