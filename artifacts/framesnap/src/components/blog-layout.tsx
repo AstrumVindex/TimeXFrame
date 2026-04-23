@@ -172,8 +172,8 @@ export function BlogLayout() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <div className="grid gap-12 md:grid-cols-[1fr_280px]">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="grid items-start gap-12 md:grid-cols-[1fr_280px]">
 
         {/* ── Column 1: Main Feed ──────────────────────────────────────── */}
         <section aria-label="Blog articles">
@@ -186,6 +186,7 @@ export function BlogLayout() {
               <BlogFeedItem
                 key={post.slug}
                 post={post}
+                isFirst={index === 0}
                 isLast={index === filtered.length - 1}
               />
             ))

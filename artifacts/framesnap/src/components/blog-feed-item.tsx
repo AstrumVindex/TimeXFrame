@@ -15,6 +15,7 @@ export interface FeedPost {
 interface BlogFeedItemProps {
   post: FeedPost;
   isLast?: boolean;
+  isFirst?: boolean;
 }
 
 /**
@@ -26,13 +27,13 @@ interface BlogFeedItemProps {
  * 3) Metadata
  * 4) Description
  */
-export function BlogFeedItem({ post, isLast = false }: BlogFeedItemProps) {
+export function BlogFeedItem({ post, isLast = false, isFirst = false }: BlogFeedItemProps) {
   const href = `/blog/${post.slug}`;
 
   return (
     <article
       aria-labelledby={`post-title-${post.slug}`}
-      className={`group py-12${!isLast ? " border-b border-zinc-100" : ""}`}
+      className={`group pb-12 ${isFirst ? "pt-0" : "pt-12"}${!isLast ? " border-b border-zinc-100" : ""}`}
     >
       {/* Title */}
       <h2
