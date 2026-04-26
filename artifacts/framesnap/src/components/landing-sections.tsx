@@ -88,6 +88,54 @@ export function FeaturesSection() {
 
 /* ─── How It Works ──────────────────────────────────────────────────────────── */
 
+const POPULAR_WAYS = [
+  {
+    title: "Extract Frames from Video Online",
+    desc: "Easily extract frames from video online without installing any software. Upload your file and get high-quality images in moments.",
+  },
+  {
+    title: "Convert Video to Images (JPG/PNG)",
+    desc: "Turn videos into images by converting frames into JPG or PNG format for blogs, social media posts, and design work.",
+  },
+  {
+    title: "Get Thumbnail from Video",
+    desc: "Capture the perfect moment from your video and use it as a thumbnail for YouTube and other platforms.",
+  },
+  {
+    title: "Extract Frames Without Losing Quality",
+    desc: "TimexFrame helps every extracted frame keep its original resolution and visual clarity.",
+  },
+];
+
+export function PopularWaysSection() {
+  return (
+    <section id="popular-ways" className="py-20 bg-white border-t border-zinc-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-zinc-900">
+            Popular Ways to Extract Frames from Video
+          </h2>
+          <p className="mt-4 text-lg text-zinc-600 max-w-3xl mx-auto">
+            TimexFrame is more than a video frame extractor. It helps you convert videos into images at the source video quality for real projects.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {POPULAR_WAYS.map(({ title, desc }) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-zinc-100 bg-zinc-50/70 p-6 shadow-sm"
+            >
+              <h3 className="text-xl font-semibold text-zinc-900 mb-2">{title}</h3>
+              <p className="text-sm sm:text-base text-zinc-600 leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 const STEPS = [
   {
     icon: Upload,

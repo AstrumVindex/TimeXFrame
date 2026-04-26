@@ -61,6 +61,34 @@ export function SeoHead({
     const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
     const absoluteUrl = getAbsoluteUrl(canonicalPath);
     const absoluteImage = image.startsWith("http") ? image : getAbsoluteUrl(image);
+    const siteRoot = new URL("/", window.location.origin).toString();
+
+    const defaultStructuredData: StructuredData = [
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: SITE_NAME,
+        alternateName: "Timex Frame",
+        url: siteRoot,
+        logo: getAbsoluteUrl("/favicon.svg"),
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: SITE_NAME,
+        alternateName: "Timex Frame",
+        url: siteRoot,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${siteRoot}blog?search={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ];
+
+    const mergedStructuredData: StructuredData = structuredData
+      ? [...defaultStructuredData, ...(Array.isArray(structuredData) ? structuredData : [structuredData])]
+      : defaultStructuredData;
 
     document.title = fullTitle;
 
@@ -83,11 +111,11 @@ export function SeoHead({
     upsertCanonical(absoluteUrl);
 
     const existingScript = document.getElementById(STRUCTURED_DATA_ID);
-    if (structuredData) {
+    if (mergedStructuredData) {
       const script = existingScript instanceof HTMLScriptElement ? existingScript : document.createElement("script");
       script.id = STRUCTURED_DATA_ID;
       script.type = "application/ld+json";
-      script.textContent = JSON.stringify(structuredData);
+      script.textContent = JSON.stringify(mergedStructuredData);
       if (!existingScript) {
         document.head.appendChild(script);
       }

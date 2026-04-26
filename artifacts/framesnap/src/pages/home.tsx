@@ -16,6 +16,9 @@ const FrameGallery = lazy(() =>
 const FeaturesSection = lazy(() =>
   import("@/components/landing-sections").then((m) => ({ default: m.FeaturesSection })),
 );
+const PopularWaysSection = lazy(() =>
+  import("@/components/landing-sections").then((m) => ({ default: m.PopularWaysSection })),
+);
 const HowItWorksSection = lazy(() =>
   import("@/components/landing-sections").then((m) => ({ default: m.HowItWorksSection })),
 );
@@ -115,8 +118,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/10">
       <SeoHead
-        title="Video to Frames Converter | Free Video Frame Extractor Online"
-        description="Get frames from video instantly with a free video to frame image converter. Extract video frames from MP4, MOV, and WEBM using timestamp, interval, or frame-count mode."
+        title="TimexFrame - Video to Frames Converter | Free Video Frame Extractor Online"
+        description="TimexFrame helps you get frames from video instantly with a free video to frame image converter. Extract video frames from MP4, MOV, and WEBM using timestamp, interval, or frame-count mode."
         canonicalPath="/"
         keywords={[
           "get frames from video",
@@ -195,6 +198,9 @@ export default function Home() {
                 <Suspense fallback={null}>
                   <div className="cv-auto">
                     <FeaturesSection />
+                  </div>
+                  <div className="cv-auto">
+                    <PopularWaysSection />
                   </div>
                   <div className="cv-auto">
                     <HowItWorksSection />
