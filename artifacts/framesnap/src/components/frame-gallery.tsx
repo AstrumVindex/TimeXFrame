@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { memo, startTransition, useState, useCallback, useEffect, useMemo } from "react";
 import type { LocalFrame } from "@/lib/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,105 @@ function downloadFrame(frame: LocalFrame) {
   a.click();
   a.remove();
 }
+
+async function processInChunks<T>(items: T[], chunkSize: number, fn: (item: T) => void) {
+  for (let i = 0; i < items.length; i += chunkSize) {
+    const chunk = items.slice(i, i + chunkSize);
+    chunk.forEach(fn);
+    if (i + chunkSize < items.length) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    }
+  }
+}
+
+interface FrameTileProps {
+  frame: LocalFrame;
+  isSelected: boolean;
+  isMobile: boolean;
+  onToggleSelection: (id: string) => void;
+  onDeleteFrame: (frame: LocalFrame, e: React.MouseEvent) => void;
+  onDownloadFrame: (frame: LocalFrame, e: React.MouseEvent) => void;
+  onPreviewFrame: (frame: LocalFrame) => void;
+}
+
+const FrameTile = memo(function FrameTile({
+  frame,
+  isSelected,
+  isMobile,
+  onToggleSelection,
+  onDeleteFrame,
+  onDownloadFrame,
+  onPreviewFrame,
+}: FrameTileProps) {
+  return (
+    <div
+      className={`
+        group relative rounded-xl overflow-hidden aspect-video border transition-all duration-300
+        ${isSelected
+          ? "ring-4 ring-primary border-primary shadow-md"
+          : "border-border shadow-sm hover:shadow-md hover:border-zinc-300 bg-zinc-100"
+        }
+      `}
+    >
+      <img
+        src={frame.url}
+        alt={`Frame at ${formatTime(frame.timestamp)}`}
+        loading="lazy"
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 cursor-pointer"
+        onClick={() => onPreviewFrame(frame)}
+      />
+
+      <div className={`absolute inset-0 transition-colors duration-300 pointer-events-none ${isSelected ? "bg-black/10" : "bg-black/0 group-hover:bg-black/25"}`} />
+
+      <div className={`absolute top-2.5 right-2.5 transition-opacity duration-200 z-10 ${isSelected || isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelection(frame.id);
+          }}
+          className="focus:outline-none"
+        >
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => {}}
+            className="w-5 h-5 rounded-full border-2 border-white bg-black/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary shadow-sm cursor-pointer"
+          />
+        </button>
+      </div>
+
+      {!isSelected && (
+        <div className={`absolute top-2.5 left-2.5 z-10 transition-opacity duration-200 flex gap-1.5 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+          <button
+            onClick={(e) => onDeleteFrame(frame, e)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-red-500 text-white transition-colors"
+            title="Delete frame"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={(e) => onDownloadFrame(frame, e)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
+            title="Download this frame"
+          >
+            <ArrowDownToLine className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {frame.suggested && !isSelected && !isMobile && (
+        <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
+          <Badge variant="secondary" className="bg-amber-100/90 backdrop-blur-sm text-amber-800 border-amber-200 shadow-sm font-medium text-[10px] px-1.5 py-0.5">
+            <Sparkles className="w-2.5 h-2.5 mr-1" /> Suggested
+          </Badge>
+        </div>
+      )}
+
+      <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-xs font-mono font-medium z-10 pointer-events-none">
+        {formatTime(frame.timestamp)}
+      </div>
+    </div>
+  );
+});
 
 // ─── Lightbox Modal ───────────────────────────────────────────────────────────
 
@@ -192,17 +291,32 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
     if (selectedIds.size === 0) return;
     setIsDeletingBulk(true);
     try {
-      const toDelete = new Set(selectedIds);
-      frames
-        .filter((f) => toDelete.has(f.id))
-        .forEach((f) => revokeIfBlobUrl(f.url));
-      setDeletedIds((prev) => new Set([...prev, ...toDelete]));
-      setSelectedIds(new Set());
-      onDeleteFrames?.(Array.from(toDelete));
+      const ids = Array.from(selectedIds);
+      const frameMap = new Map(frames.map((f) => [f.id, f] as const));
+
+      await processInChunks(ids, 60, (id) => {
+        const frame = frameMap.get(id);
+        if (frame) revokeIfBlobUrl(frame.url);
+      });
+
+      startTransition(() => {
+        setDeletedIds((prev) => new Set([...prev, ...ids]));
+        setSelectedIds(new Set());
+      });
+      onDeleteFrames?.(ids);
     } finally {
       setIsDeletingBulk(false);
     }
   }, [selectedIds, frames, onDeleteFrames]);
+
+  const allFrames = useMemo(
+    () => frames.filter((f) => !deletedIds.has(f.id)),
+    [frames, deletedIds],
+  );
+  const visibleFrames = useMemo(
+    () => allFrames.filter((f) => (showSuggestedOnly ? f.suggested : true)),
+    [allFrames, showSuggestedOnly],
+  );
 
   if (!hasExtracted) {
     return (
@@ -218,9 +332,6 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
     );
   }
 
-  const allFrames = frames.filter((f) => !deletedIds.has(f.id));
-  const visibleFrames = allFrames.filter((f) => (showSuggestedOnly ? f.suggested : true));
-
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -234,7 +345,9 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
     if (selectedIds.size === visibleFrames.length && visibleFrames.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(visibleFrames.map((f) => f.id)));
+      startTransition(() => {
+        setSelectedIds(new Set(visibleFrames.map((f) => f.id)));
+      });
     }
   };
 
@@ -335,85 +448,21 @@ export function FrameGallery({ sessionId, frames, hasExtracted, extractionVersio
 
       {/* Frame grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-        {visibleFrames.map((frame) => {
-          const isSelected = selectedIds.has(frame.id);
-          return (
-            <div
-              key={frame.id}
-              className={`
-                  group relative rounded-xl overflow-hidden aspect-video border transition-all duration-300
-                  ${isSelected
-                    ? "ring-4 ring-primary border-primary shadow-md"
-                    : "border-border shadow-sm hover:shadow-md hover:border-zinc-300 bg-zinc-100"
-                  }
-                `}
-            >
-                <img
-                  src={frame.url}
-                  alt={`Frame at ${formatTime(frame.timestamp)}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 cursor-pointer"
-                  onClick={() => setPreviewFrame(frame)}
-                />
-
-                {/* Dark overlay on hover/selected */}
-                <div className={`absolute inset-0 transition-colors duration-300 pointer-events-none ${isSelected ? "bg-black/10" : "bg-black/0 group-hover:bg-black/25"}`} />
-
-                {/* Checkbox top-right */}
-                <div className={`absolute top-2.5 right-2.5 transition-opacity duration-200 z-10 ${isSelected || isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleSelection(frame.id);
-                    }}
-                    className="focus:outline-none"
-                  >
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => {}}
-                      className="w-5 h-5 rounded-full border-2 border-white bg-black/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary shadow-sm cursor-pointer"
-                    />
-                  </button>
-                </div>
-
-                {/* Action buttons top-left (on hover, not selected) */}
-                {!isSelected && (
-                  <div className={`absolute top-2.5 left-2.5 z-10 transition-opacity duration-200 flex gap-1.5 ${isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                    {/* Delete */}
-                    <button
-                      onClick={(e) => handleDeleteFrame(frame, e)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-red-500 text-white transition-colors"
-                      title="Delete frame"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                    {/* Direct download */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); downloadFrame(frame); }}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-black/50 backdrop-blur-sm hover:bg-white/20 text-white transition-colors"
-                      title="Download this frame"
-                    >
-                      <ArrowDownToLine className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Suggested badge */}
-                {frame.suggested && !isSelected && !isMobile && (
-                  <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none group-hover:opacity-0 transition-opacity duration-200">
-                    <Badge variant="secondary" className="bg-amber-100/90 backdrop-blur-sm text-amber-800 border-amber-200 shadow-sm font-medium text-[10px] px-1.5 py-0.5">
-                      <Sparkles className="w-2.5 h-2.5 mr-1" /> Suggested
-                    </Badge>
-                  </div>
-                )}
-
-                {/* Timestamp bottom-left */}
-                <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-white text-xs font-mono font-medium z-10 pointer-events-none">
-                  {formatTime(frame.timestamp)}
-                </div>
-            </div>
-          );
-        })}
+        {visibleFrames.map((frame) => (
+          <FrameTile
+            key={frame.id}
+            frame={frame}
+            isSelected={selectedIds.has(frame.id)}
+            isMobile={isMobile}
+            onToggleSelection={toggleSelection}
+            onDeleteFrame={handleDeleteFrame}
+            onDownloadFrame={(target, e) => {
+              e.stopPropagation();
+              downloadFrame(target);
+            }}
+            onPreviewFrame={setPreviewFrame}
+          />
+        ))}
       </div>
 
       {visibleFrames.length === 0 && (

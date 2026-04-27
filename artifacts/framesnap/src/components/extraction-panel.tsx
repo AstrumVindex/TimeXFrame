@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 interface ExtractionPanelProps {
   session: LocalSession;
@@ -117,6 +123,16 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
 
   // Output settings
   const [format, setFormat] = useState<"jpg" | "png" | "webp">("png");
+
+  const trackStartExtractionConversion = useCallback(() => {
+    try {
+      window.gtag?.("event", "conversion", {
+        send_to: "AW-18121444926/wKE1CMDSuaMcEL6c_cBD",
+      });
+    } catch {
+      // Do not block extraction if tracking is unavailable.
+    }
+  }, []);
 
   // ── Estimation ──────────────────────────────────────────────────────────────
   const estimation = useMemo(() => {
@@ -240,6 +256,9 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
         setErrorMessage("No frames to extract with the current settings.");
         return;
       }
+
+      // Fire conversion after extraction successfully starts (post-validation).
+      trackStartExtractionConversion();
 
       // Signal the parent to clear old frames before we start streaming new ones
       onExtracted([]);

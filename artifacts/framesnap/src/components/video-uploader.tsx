@@ -232,12 +232,17 @@ export function VideoUploader({ onUploadSuccess, onFileSelect }: VideoUploaderPr
                 </h2>
                 <p className="text-sm text-zinc-600 mb-1">or click to browse files</p>
                 {!isMobile ? (
-                  <label
-                    htmlFor={inputId}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      openFilePicker();
+                    }}
                     className="px-6 py-2.5 rounded-full bg-zinc-900 border border-zinc-900 shadow-sm text-sm font-semibold text-white hover:bg-zinc-800 hover:shadow-md active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition-all cursor-pointer"
                   >
                     Browse Files
-                  </label>
+                  </button>
                 ) : null}
             </div>
           )}
