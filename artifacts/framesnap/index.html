@@ -11,6 +11,18 @@
       function gtag() {
         dataLayer.push(arguments);
       }
+      function gtag_report_conversion(url) {
+        var callback = function () {
+          if (typeof url !== "undefined") {
+            window.location = url;
+          }
+        };
+        gtag("event", "conversion", {
+          send_to: "AW-18121444926/wKE1CMDSuaMcEL6c_cBD",
+          event_callback: callback,
+        });
+        return false;
+      }
       gtag('js', new Date());
 
       gtag('config', 'AW-18121444926');

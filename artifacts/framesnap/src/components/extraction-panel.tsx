@@ -27,6 +27,7 @@ import {
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    gtag_report_conversion?: (url?: string) => boolean;
   }
 }
 
@@ -126,9 +127,7 @@ export function ExtractionPanel({ session, onExtracted, onFrameExtracted, playhe
 
   const trackStartExtractionConversion = useCallback(() => {
     try {
-      window.gtag?.("event", "conversion", {
-        send_to: "AW-18121444926/wKE1CMDSuaMcEL6c_cBD",
-      });
+      window.gtag_report_conversion?.();
     } catch {
       // Do not block extraction if tracking is unavailable.
     }
